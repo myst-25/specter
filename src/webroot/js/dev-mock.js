@@ -38,7 +38,7 @@ if (typeof window.ksu === 'undefined') {
       );
     }
 
-    if (u.includes('/json/device-info.json')) {
+    if (u.includes('/json/info.json')) {
       return Promise.resolve(new Response(JSON.stringify({
         android: '14', kernel: '6.1.0', root: 'KernelSU',
       }), { status: 200, headers: { 'Content-Type': 'application/json' } }));

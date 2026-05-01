@@ -3,4 +3,6 @@ name=Yurikey Manager
 version=v4.0.0
 versionCode=400
 author=Yurikey Dev
-description=A systemless module to get strong integrity
+description=A systemless module to get strong integrity so easily
+banner=https://raw.githubusercontent.com/Yurii0307/yurikey/main/doc/banner.webp
+updateJson=https://raw.githubusercontent.com/Yurii0307/yurikey/main/update.json

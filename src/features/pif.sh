@@ -6,27 +6,29 @@ log "PIF" "Start"
 
 PIF_DIR="/data/adb/modules/playintegrityfix"
 
+check_network || { log "PIF" "Error: No internet connection"; exit 1; }
+
 if [ ! -d "$PIF_DIR" ]; then
-  log "PIF" "Warning: Play Integrity Fix not installed, skipping"
-  exit 0
+  log "PIF" "Error: Play Integrity Fix not installed"
+  exit 1
 fi
 
 MODULE_NAME=$(grep "^name=" "$PIF_DIR/module.prop" 2>/dev/null | cut -d= -f2-)
-[ -z "$MODULE_NAME" ] && { log "PIF" "Warning: Cannot read module.prop, skipping"; exit 0; }
+[ -z "$MODULE_NAME" ] && { log "PIF" "Error: Cannot read module.prop"; exit 1; }
 
 case "$MODULE_NAME" in
   "Play Integrity Fix [INJECT]")
     log "PIF" "Detected INJECT variant"
-    sh "$PIF_DIR/autopif_ota.sh" 2>/dev/null || true
-    sh "$PIF_DIR/autopif.sh" 2>/dev/null || log "PIF" "Warning: autopif.sh failed"
+    sh "$PIF_DIR/autopif_ota.sh" || log "PIF" "Warning: autopif_ota.sh failed"
+    sh "$PIF_DIR/autopif.sh" || log "PIF" "Warning: autopif.sh failed"
     ;;
   "Play Integrity Fork")
     log "PIF" "Detected Fork variant"
-    sh "$PIF_DIR/autopif4.sh" -m 2>/dev/null || log "PIF" "Warning: autopif4.sh failed"
+    sh "$PIF_DIR/autopif4.sh" -m || log "PIF" "Warning: autopif4.sh failed"
     ;;
   *)
-    log "PIF" "Warning: Unknown module: $MODULE_NAME"
-    exit 0
+    log "PIF" "Error: Unknown module variant: $MODULE_NAME"
+    exit 1
     ;;
 esac
 

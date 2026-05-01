@@ -6,8 +6,8 @@ MODDIR=${0%/*}
 log "SECURITY_PATCH" "Start"
 
 current_year=$(date +%Y) || die "Failed to get year"
-current_month=$(date +%m | sed 's/^0*//') || die "Failed to get month"
-current_day=$(date +%d | sed 's/^0*//') || die "Failed to get day"
+current_month=$(date +%m) || die "Failed to get month"
+current_day=$(date +%d) || die "Failed to get day"
 
 if [ "$current_day" -lt 5 ]; then
   if [ "$current_month" -eq 1 ]; then
@@ -25,9 +25,9 @@ fi
 formatted_month=$(printf "%02d" "$target_month")
 patch_date="${target_year}-${formatted_month}-05"
 
-log "SECURITY_PATCH" "Writing $patch_date"
+log "SECURITY_PATCH" "Writing $patch_date to $SECURITY_PATCH_FILE"
 
-cat > "$SECURITY_PATCH_FILE" <<EOF
+cat > "$SECURITY_PATCH_FILE" <<EOF || die "Failed to write $SECURITY_PATCH_FILE"
 system=prop
 boot=$patch_date
 vendor=$patch_date

@@ -14,13 +14,7 @@ _rm() { [ -n "$1" ] && rm -rf "$1" 2>/dev/null; }
 
 for _pkg in $DETECTOR_APPS; do
   _rm "/storage/emulated/0/Android/data/$_pkg"
-done
-
-for _pkg in $DETECTOR_APPS; do
   _rm "/storage/emulated/0/Android/obb/$_pkg"
-done
-
-for _pkg in $DETECTOR_APPS; do
   _rm "/storage/emulated/0/Android/media/$_pkg"
 done
 
@@ -112,22 +106,15 @@ resetprop -p --delete persist.com.luckyzyx.luckytool.enable 2>/dev/null || true
 resetprop -p --delete persist.sys.developer_options 2>/dev/null || true
 resetprop -p --delete persist.sys.dev_mode 2>/dev/null || true
 
-resetprop -n persist.sys.developer_options 0
 resetprop -n persist.sys.dev_mode 0
 resetprop -n persist.sys.debuggable 0
 
-settings put global development_settings_enabled 0
-settings put global adb_enabled 0
-settings put global oem_unlock_allowed 0
-settings put global adb_wifi_enabled 0
-settings put global adb_wifi_port -1
+apply_boot_hardening
 
 if [ "$(getenforce 2>/dev/null)" = "Enforcing" ]; then
   resetprop ro.boot.selinux enforcing
   resetprop ro.build.selinux 1
 fi
-
-find /data/app -type f -name base.odex -delete 2>/dev/null
 
 unset _rm _pkg
 log "CLEANUP" "Finish"

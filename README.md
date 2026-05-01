@@ -50,6 +50,7 @@ https://t.me/yurikernel
 > [BusyBox](https://mmrl.dev/repository/grdoglgmr/busybox-ndk)
 
 ## Contributors
+[Khx](https://github.com/dpejoh)  
 [Yuri](https://github.com/Yurii0307)  
 [Tam](https://github.com/Tam97123)  
 [yourbestregard](https://github.com/yourbestregard)  
@@ -57,7 +58,6 @@ https://t.me/yurikernel
 [ZG089](https://github.com/ZG089)  
 [Munch](https://github.com/SudoNothing404)  
 [Wes](https://github.com/ihatenodejs)  
-[Khx](https://github.com/dpejoh)  
 
 
 

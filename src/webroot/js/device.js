@@ -1,6 +1,5 @@
-import { getModuleDir } from './cfg.js';
-
-const INFO_URL = '/json/device-info.json';
+const INFO_URL = '/json/info.json';
+const KEYBOX_INFO_URL = '/json/keybox_info.json';
 
 let bridge = null;
 async function getBridge() {
@@ -12,14 +11,32 @@ export async function initDevice() {
   await loadDeviceInfo();
   refreshDevice();
   await loadVersion();
+  refreshKeyboxStatus();
 }
 
 export async function refreshDevice() {
   const { runScript } = await getBridge();
   try {
-    await runScript('device-info.sh', 'common');
+    const result = await runScript('device-info.sh', 'common');
+    if (result.output) {
+      const { appendToOutput } = await import('./terminal.js');
+      result.output.split('\n').filter(Boolean).forEach(l => appendToOutput(`[device-info] ${l}`));
+    }
   } catch { }
   await waitForValidDeviceInfo();
+}
+
+export async function refreshKeyboxStatus() {
+  const { runScript } = await getBridge();
+  try {
+    const result = await runScript('keybox_info.sh', 'feature');
+    if (result.output) {
+      const { appendToOutput } = await import('./terminal.js');
+      result.output.split('\n').filter(Boolean).forEach(l => appendToOutput(`[keybox] ${l}`));
+    }
+  } catch { }
+  await waitForKeyboxInfo();
+  await loadKeyboxStatus();
 }
 
 async function fetchDeviceInfo() {
@@ -55,26 +72,82 @@ function applyDeviceInfo(data) {
 }
 
 export async function loadVersion() {
-  let version = null;
-
   try {
-    const res = await fetch('/module.prop?ts=' + Date.now());
-    const text = await res.text();
-    const match = text.match(/^version=(.+)$/m);
-    if (match) version = match[1].trim();
+    const res = await fetch(`${INFO_URL}?ts=${Date.now()}`);
+    const data = await res.json();
+    if (data.version) setText('version-info-value', data.version);
   } catch { }
+}
 
-  if (!version) {
+async function fetchKeyboxInfo() {
+  const res = await fetch(`${KEYBOX_INFO_URL}?ts=${Date.now()}`);
+  return await res.json();
+}
+
+async function waitForKeyboxInfo(maxMs = 6000, intervalMs = 300) {
+  const start = Date.now();
+  while (Date.now() - start < maxMs) {
     try {
-      const { runScriptRaw } = await getBridge();
-      const { stdout } = await runScriptRaw(
-        `grep '^version=' "${getModuleDir()}/module.prop" | cut -d'=' -f2`
-      );
-      if (stdout) version = stdout.trim();
+      const data = await fetchKeyboxInfo();
+      if ('installed' in data) return;
     } catch { }
+    await new Promise(r => setTimeout(r, intervalMs));
+  }
+}
+
+let keyboxInfo = null;
+
+export function getKeyboxInfo() {
+  return keyboxInfo;
+}
+
+async function loadKeyboxStatus() {
+  try {
+    keyboxInfo = await fetchKeyboxInfo();
+    applyKeyboxStatus(keyboxInfo);
+  } catch { }
+}
+
+function applyKeyboxStatus(data) {
+  const source = document.getElementById('keybox-source');
+  const statusEl = document.getElementById('keybox-status');
+  const icon = document.getElementById('keybox-icon');
+  if (!source || !statusEl || !icon) return;
+
+  if (!data.installed) {
+    source.textContent = 'Not Installed';
+    source.className = 'keybox-chip keybox-chip--neutral';
+    statusEl.style.display = 'none';
+    icon.textContent = 'vpn_key_off';
+    return;
   }
 
-  if (version) setText('version-value', version);
+  statusEl.style.display = '';
+
+  if (data.by_yuri) {
+    const label = data.yuri_version ? `Yuri Keybox v${data.yuri_version}` : 'Yuri Keybox';
+    if (data.up_to_date) {
+      source.textContent = label + ' \u00B7 Latest';
+      source.className = 'keybox-chip keybox-chip--yuri';
+      icon.textContent = 'verified_user';
+    } else {
+      source.textContent = label;
+      source.className = 'keybox-chip keybox-chip--outdated';
+      icon.textContent = 'system_update';
+    }
+  } else {
+    source.textContent = 'Generic';
+    source.className = 'keybox-chip keybox-chip--neutral';
+    icon.textContent = 'key';
+  }
+
+  if (data.revoked) {
+    statusEl.textContent = 'Revoked';
+    statusEl.className = 'keybox-chip keybox-chip--revoked';
+  } else {
+    statusEl.textContent = 'Active';
+    statusEl.className = 'keybox-chip keybox-chip--active';
+  }
 }
 
 function setText(id, value) {

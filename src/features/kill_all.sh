@@ -6,16 +6,18 @@ MODDIR=${0%/*}
 
 log "KILL_ALL" "Start"
 
+_count=0
 ALL_PKGS="$DETECTOR_APPS $GMS_APPS"
+_installed_pkgs=$(pm list packages 2>/dev/null)
 
 for pkg in $ALL_PKGS; do
-  if ! pm list packages | grep -q "^package:$pkg$"; then
-    log "KILL_ALL" "Package $pkg not installed, skipping"
-    continue
-  fi
+  echo "$_installed_pkgs" | grep -Fq "package:$pkg" || continue
   am force-stop "$pkg" >/dev/null 2>&1 || true
   pm clear "$pkg" >/dev/null 2>&1 || true
+  _count=$((_count + 1))
 done
+unset _installed_pkgs
 
+log "KILL_ALL" "Cleared $_count packages"
 log "KILL_ALL" "Finish"
 exit 0

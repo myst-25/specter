@@ -10,8 +10,8 @@ log "RKA" "Start"
 MOD="io.github.mhmrdd.libxposed.ps.passit"
 
 if ! pm path "$MOD" >/dev/null 2>&1; then
-  log "RKA" "Warning: PassIt not installed, skipping"
-  exit 0
+  log "RKA" "Error: PassIt not installed"
+  exit 1
 fi
 
 CFG="/data/user/$(id -u)/${MOD}/files/rka_configs.json"

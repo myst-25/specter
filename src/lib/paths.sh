@@ -10,15 +10,17 @@ TEE_STATUS="$TRICKY_DIR/tee_status"
 BOOT_HASH_FILE="/data/adb/boot_hash"
 HMA_DIR="/data/user/0/org.frknkrc44.hma_oss/files"
 HMA_FILE="$HMA_DIR/config.json"
-IDFILE="$_YURIKEY_ROOT/yurid"
+IDFILE="/data/local/tmp/yurid"
 
 # Module-local paths — derived from MODDIR (set by caller before sourcing)
 # Handles both feature scripts (MODDIR ends with /features) and root scripts
-case "$MODDIR" in
-  */features) _YURIKEY_ROOT="${MODDIR%/*}" ;;
-  *)          _YURIKEY_ROOT="$MODDIR" ;;
-esac
-BBIN="$_YURIKEY_ROOT/bin"
-YURIKEY_CONFIG_DIR="$_YURIKEY_ROOT/config"
-MIGRATION_MARKER="$_YURIKEY_ROOT/.migrated"
-unset _YURIKEY_ROOT
+if [ -n "$MODDIR" ]; then
+  case "$MODDIR" in
+    */features) _YURIKEY_ROOT="${MODDIR%/*}" ;;
+    *)          _YURIKEY_ROOT="$MODDIR" ;;
+  esac
+  BBIN="$_YURIKEY_ROOT/bin"
+  YURIKEY_CONFIG_DIR="$_YURIKEY_ROOT/config"
+  MIGRATION_MARKER="$_YURIKEY_ROOT/.migrated"
+  unset _YURIKEY_ROOT
+fi

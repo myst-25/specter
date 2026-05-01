@@ -22,14 +22,17 @@ fi
 
 if [ -f "$MIGRATION_MARKER" ]; then
     rm -f "$MIGRATION_MARKER" 2>/dev/null
+    log "UNINSTALL" "Removed migration marker"
 fi
 
 if [ -f "$BOOT_HASH_FILE" ]; then
     rm -f "$BOOT_HASH_FILE" 2>/dev/null
+    log "UNINSTALL" "Removed boot hash file"
 fi
 
 if [ -f "$IDFILE" ]; then
     rm -f "$IDFILE" 2>/dev/null
+    log "UNINSTALL" "Removed RKA ID file"
 fi
 
 # Clean up RKA config in PassIt app data

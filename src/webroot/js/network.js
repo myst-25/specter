@@ -16,9 +16,6 @@ export async function updateNetworkStatus() {
   const wasOnline = lastStatus;
   lastStatus = online;
 
-  const statusCard  = document.getElementById('status-card');
-  const statusIcon  = document.getElementById('status-icon');
-  const statusValue = document.getElementById('status-value');
   const netChip     = document.getElementById('network-chip');
 
   const { getTranslation } = await import('./i18n.js');
@@ -26,10 +23,6 @@ export async function updateNetworkStatus() {
   const offlineText = getTranslation('home_status_offline') || 'Offline';
 
   if (online) {
-    statusCard?.classList.remove('status-offline');
-    statusCard?.classList.add('status-online');
-    if (statusIcon)  statusIcon.textContent = 'wifi';
-    if (statusValue) statusValue.textContent = onlineText;
     netChip?.classList.remove('offline');
     if (netChip) {
       const label = netChip.querySelector('#network-label');
@@ -38,10 +31,6 @@ export async function updateNetworkStatus() {
       if (icon) icon.textContent = 'wifi';
     }
   } else {
-    statusCard?.classList.remove('status-online');
-    statusCard?.classList.add('status-offline');
-    if (statusIcon)  statusIcon.textContent = 'wifi_off';
-    if (statusValue) statusValue.textContent = offlineText;
     netChip?.classList.add('offline');
     if (netChip) {
       const label = netChip.querySelector('#network-label');

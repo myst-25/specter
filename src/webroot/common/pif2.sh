@@ -1,5 +1,6 @@
 #!/system/bin/sh
-
-getprop | grep -E "pihook|pixelprops" | sed -E "s/^\[(.*)\]:.*/\1/" | while IFS= read -r prop; do
-  resetprop -p -d "$prop" 2>/dev/null || true
-done
+MODDIR="${0%/*}"
+MODDIR="${MODDIR%/*}"
+MODDIR="${MODDIR%/*}"
+. "$MODDIR/lib/common.sh"
+sh "$MODDIR/features/pif2.sh"

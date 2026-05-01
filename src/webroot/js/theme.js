@@ -10,13 +10,89 @@ const PRESETS = {
 };
 
 let currentPreset = 'ocean';
+let currentSeed = null;
 
 export async function initTheme(savedMode) {
-  const preset = await cfgGet('theme_preset', 'ocean') || 'ocean';
+  const preset = await cfgGet('theme_preset', 'monet') || 'monet';
   currentPreset = preset;
   const mode = savedMode || 'dark';
-  applyMode(mode);
+
+  await customElements.whenDefined('md-filter-chip');
+  document.querySelectorAll('.preset-chip').forEach(chip => {
+    chip.selected = chip.dataset.preset === preset;
+  });
+
+  if (preset === 'monet') {
+    await applyMonetPreset(mode);
+  } else {
+    applyMode(mode);
+  }
+
   wireThemeControls();
+}
+
+async function extractMonetColor() {
+  try {
+    const { exec } = await import('./bridge.js');
+
+    const commands = [
+      `cmd overlay lookup com.android.systemui android:color/system_accent1_500 2>/dev/null`,
+      `settings get secure monet_engine_seed 2>/dev/null`,
+      `getprop persist.sys.theme.color 2>/dev/null`,
+      `dumpsys wallpaper 2>/dev/null | grep -oE '0x[0-9a-fA-F]{8}' | head -1 | tr -d '\\n'`,
+    ];
+
+    for (const cmd of commands) {
+      const { stdout } = await exec(cmd);
+      const hex = stdout?.trim();
+      if (!hex) continue;
+
+      let argb;
+      if (/^0x[0-9a-fA-F]{8}$/.test(hex)) {
+        argb = parseInt(hex, 16);
+      } else if (/^#[0-9a-fA-F]{8}$/.test(hex)) {
+        argb = parseInt(hex.slice(1), 16);
+      } else if (/^#?[0-9a-fA-F]{6}$/.test(hex.replace('#', ''))) {
+        argb = parseInt(hex.replace('#', ''), 16) | 0xFF000000;
+      } else if (/^\d+$/.test(hex) && hex.length > 6) {
+        argb = parseInt(hex, 10);
+      }
+
+      if (argb && !isNaN(argb)) {
+        const seed = '#' + (argb & 0x00FFFFFF).toString(16).padStart(6, '0');
+        if (seed !== '#000000') return seed;
+      }
+    }
+  } catch {}
+  return null;
+}
+
+async function applyMonetPreset(mode) {
+  let seed = await cfgGet('monet_seed', null);
+  if (!seed) {
+    seed = await extractMonetColor();
+    if (seed) {
+      cfgSet('monet_seed', seed);
+    } else {
+      seed = PRESETS.ocean;
+    }
+  }
+  currentSeed = seed;
+
+  const resolved = mode === 'auto'
+    ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+    : mode;
+  document.documentElement.setAttribute('data-theme-preset', 'monet');
+  cfgSet('theme_preset', 'monet');
+  generateScheme(seed, resolved === 'dark');
+
+  const fresh = await extractMonetColor();
+  if (fresh && fresh !== currentSeed) {
+    currentSeed = fresh;
+    cfgSet('monet_seed', fresh);
+    const nowResolved = document.documentElement.getAttribute('data-theme-resolved') === 'dark';
+    generateScheme(fresh, nowResolved);
+  }
 }
 
 function applyMode(mode) {
@@ -33,12 +109,22 @@ function applyMode(mode) {
       btn.selected = btn.getAttribute('value') === mode;
     });
   }
-  generateScheme(currentPreset, resolved === 'dark');
+
+  const seed = currentPreset === 'monet' ? currentSeed : PRESETS[currentPreset];
+  generateScheme(seed, resolved === 'dark');
 }
 
 function applyPreset(preset) {
+  if (preset === 'monet') {
+    document.querySelectorAll('.preset-chip').forEach(chip => {
+      chip.selected = chip.dataset.preset === 'monet';
+    });
+    applyMonetPreset(document.documentElement.getAttribute('data-theme') || 'dark');
+    return;
+  }
   const seed = PRESETS[preset];
   if (!seed) return;
+  currentSeed = null;
   currentPreset = preset;
   document.documentElement.setAttribute('data-theme-preset', preset);
   cfgSet('theme_preset', preset);
@@ -46,11 +132,10 @@ function applyPreset(preset) {
     chip.selected = chip.dataset.preset === preset;
   });
   const resolved = document.documentElement.getAttribute('data-theme-resolved') === 'dark';
-  generateScheme(preset, resolved);
+  generateScheme(seed, resolved);
 }
 
-function generateScheme(preset, isDark) {
-  const seed = PRESETS[preset];
+function generateScheme(seed, isDark) {
   if (!seed) return;
   const argb = parseInt(seed.slice(1), 16) | 0xFF000000;
   const scheme = isDark ? Scheme.dark(argb) : Scheme.light(argb);
@@ -88,7 +173,7 @@ function wireThemeControls() {
   });
 
   document.querySelectorAll('.preset-chip').forEach(chip => {
-    chip.addEventListener('click', () => applyPreset(chip.dataset.preset));
+    chip.addEventListener('click', async () => applyPreset(chip.dataset.preset));
   });
 
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {

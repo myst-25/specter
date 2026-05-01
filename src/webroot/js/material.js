@@ -15,8 +15,6 @@ import '@material/web/progress/circular-progress.js';
 import '@material/web/select/outlined-select.js';
 import '@material/web/select/select-option.js';
 import '@material/web/switch/switch.js';
-import '@material/web/labs/navigationbar/navigation-bar.js';
-import '@material/web/labs/navigationtab/navigation-tab.js';
 import '@material/web/labs/segmentedbuttonset/outlined-segmented-button-set.js';
 import '@material/web/labs/segmentedbutton/outlined-segmented-button.js';
 import '@material/web/labs/card/outlined-card.js';

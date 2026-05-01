@@ -1,18 +1,17 @@
 #!/system/bin/sh
-# delete_twrp_folder.sh
-# Script to delete TWRP folder from Android internal storage
+MODDIR=${0%/*}
+. "$MODDIR/../lib/common.sh"
 
-echo "Starting deletion of TWRP folder..."
+log "TWRP" "Start"
 
-# Define the TWRP folder path (adjust if needed)
-TWRP_FOLDER="/sdcard/TWRP"
-
+TWRP_FOLDER="/storage/emulated/0/TWRP"
 if [ -d "$TWRP_FOLDER" ]; then
-  echo "- Found folder $TWRP_FOLDER. Deleting..."
-  rm -rf "$TWRP_FOLDER"
-  echo "Folder deleted successfully."
+  log "TWRP" "Deleting $TWRP_FOLDER"
+  rm -rf "$TWRP_FOLDER" 2>/dev/null
+  log "TWRP" "Deleted successfully"
 else
-  echo "- Folder $TWRP_FOLDER not found. Nothing to delete."
+  log "TWRP" "Folder $TWRP_FOLDER not found, skipping"
 fi
 
-echo "TWRP folder deletion script completed."
+log "TWRP" "Finish"
+exit 0

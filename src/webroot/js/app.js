@@ -1,7 +1,7 @@
 import './material.js';
 import { initBridge, spawnScript, getModuleDir as getBridgeModuleDir } from './bridge.js';
 import { setModuleDir, migrateLocalStorage, cfgGet, cfgSet } from './cfg.js';
-import { initDevice, refreshDevice } from './device.js';
+import { initDevice, refreshDevice, refreshKeyboxStatus } from './device.js';
 import { initClock } from './clock.js';
 import { initNetwork } from './network.js';
 import { initTheme } from './theme.js';
@@ -11,6 +11,7 @@ import { initRedirect } from './redirect.js';
 import { escapeHtml } from './utils.js';
 import { openRecentActivity, addEntry } from './history.js';
 import { showToast } from './toast.js';
+import { initTerminal, appendToOutput } from './terminal.js';
 
 let devMode = false;
 let friendlyNames = {};
@@ -29,7 +30,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initTheme(savedTheme);
   wireNavigation();
   wireActions();
-  wireVersionCard();
+  wireKeyboxCard();
   wireRefreshButton();
   await initI18n();
   initClock();
@@ -44,6 +45,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const sw = document.getElementById('dev-mode-switch');
   if (sw) sw.selected = devMode;
   wireDevMode();
+  initTerminal();
 });
 
 function wireTopBarScroll() {
@@ -56,7 +58,8 @@ function wireTopBarScroll() {
 }
 
 function wireNavigation() {
-  const navBar = document.getElementById('nav-bar');
+  const navTabs = document.querySelectorAll('.nav-tab');
+  const indicator = document.getElementById('nav-indicator');
   const pages = [
     document.getElementById('home-page'),
     document.getElementById('actions-page'),
@@ -64,12 +67,44 @@ function wireNavigation() {
     document.getElementById('settings-page'),
   ];
 
-  navBar.addEventListener('navigation-bar-activated', (e) => {
-    const activeIndex = e.detail.activeIndex;
-    pages.forEach((el, i) => {
-      el.hidden = i !== activeIndex;
+  function reposition(tab) {
+    indicator.style.left = tab.offsetLeft + 'px';
+    indicator.style.width = tab.offsetWidth + 'px';
+  }
+
+  requestAnimationFrame(() => {
+    const active = document.querySelector('.nav-tab--active');
+    if (active) reposition(active);
+  });
+
+  navTabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      if (tab.classList.contains('nav-tab--active')) return;
+
+      const oldTab = document.querySelector('.nav-tab--active');
+      if (oldTab) {
+        oldTab.classList.remove('nav-tab--active');
+        oldTab.removeAttribute('aria-current');
+        oldTab.querySelector('.nav-icon')?.classList.remove('nav-icon--filled');
+      }
+
+      tab.classList.add('nav-tab--active');
+      tab.setAttribute('aria-current', 'page');
+      tab.querySelector('.nav-icon')?.classList.add('nav-icon--filled');
+
+      reposition(tab);
+
+      const pageId = tab.dataset.page;
+      pages.forEach((el) => {
+        el.hidden = el.id !== pageId;
+      });
+      window.scrollTo({ top: 0, behavior: 'instant' });
     });
-    window.scrollTo({ top: 0, behavior: 'instant' });
+  });
+
+  window.addEventListener('resize', () => {
+    const active = document.querySelector('.nav-tab--active');
+    if (active) reposition(active);
   });
 }
 
@@ -126,6 +161,8 @@ async function runDevAction(scriptName, item, spinner) {
   const lines = [];
   const { getTranslation } = await import('./i18n.js');
 
+  appendToOutput(`> ${scriptName}`);
+
   const dialog = document.createElement('md-dialog');
   dialog.innerHTML = `
     <div slot="headline">${scriptName}</div>
@@ -144,20 +181,24 @@ async function runDevAction(scriptName, item, spinner) {
 
   const child = spawnScript(scriptName, 'feature');
   child.stdout.on('data', line => {
+    appendToOutput(line);
     lines.push(line);
     if (pre) pre.textContent += line + '\n';
     if (pre?.parentElement) pre.parentElement.scrollTop = pre.parentElement.scrollHeight;
   });
   child.stderr.on('data', line => {
+    appendToOutput(line, true);
     lines.push('[!] ' + line);
     if (pre) pre.textContent += '[!] ' + line + '\n';
     if (pre?.parentElement) pre.parentElement.scrollTop = pre.parentElement.scrollHeight;
   });
-  child.on('exit', () => {
+  child.on('exit', (code) => {
+    appendToOutput(`> ${scriptName} exited (code: ${code})`);
     addEntry(scriptName, lines.join('\n'));
   });
   child.on('error', err => {
     const msg = err.message || 'Unknown error';
+    appendToOutput(`> Error: ${msg}`, true);
     addEntry(scriptName, msg);
   });
 }
@@ -168,6 +209,8 @@ async function runSimpleAction(scriptName, item, spinner) {
   const friendlyName = getTranslation(i18nKey) || i18nKey;
   const lines = [];
 
+  appendToOutput(`> ${friendlyName}`);
+
   const dialog = document.getElementById('progress-dialog');
   const label = document.getElementById('progress-label');
   const text = document.getElementById('progress-text');
@@ -176,26 +219,61 @@ async function runSimpleAction(scriptName, item, spinner) {
   dialog.show();
 
   const child = spawnScript(scriptName, 'feature');
-  child.stdout.on('data', line => { lines.push(line); });
-  child.stderr.on('data', line => { lines.push('[!] ' + line); });
+  child.stdout.on('data', line => {
+    appendToOutput(line);
+    lines.push(line);
+  });
+  child.stderr.on('data', line => {
+    appendToOutput(line, true);
+    lines.push('[!] ' + line);
+  });
 
-  child.on('exit', () => {
+  child.on('exit', (code) => {
+    appendToOutput(`> ${friendlyName} exited (code: ${code})`);
     addEntry(scriptName, lines.join('\n'));
     dialog.close();
-    showToast(getTranslation('toast_success') || 'Done ✓', {
-      autoCloseDelay: 3000,
-      className: 'snackbar-success',
-    });
+
+    if (code !== 0) {
+      const errorMsg = lines.find(l => l.includes('Error')) || lines[lines.length - 1] || friendlyName;
+      showToast(`${getTranslation('simple_toast_error') || 'Failed'}: ${errorMsg}`, {
+        icon: 'error',
+        type: 'error',
+        action: getTranslation('simple_toast_view_details') || 'View Details',
+        autoCloseDelay: 8000,
+        onActionClick: () => {
+          const errDialog = document.createElement('md-dialog');
+          errDialog.innerHTML = `
+            <div slot="headline">${getTranslation('error_dialog_title') || 'Error Details'}</div>
+            <div slot="content"><div class="terminal"><pre>${escapeHtml(lines.join('\n'))}</pre></div></div>
+            <div slot="actions">
+              <md-text-button class="dialog-close">${getTranslation('dialog_close') || 'Close'}</md-text-button>
+            </div>
+          `;
+          document.body.appendChild(errDialog);
+          errDialog.querySelector('.dialog-close').addEventListener('click', () => errDialog.close());
+          errDialog.addEventListener('close', () => document.body.removeChild(errDialog));
+          errDialog.show();
+        },
+      });
+    } else {
+      showToast(getTranslation('toast_success') || 'Done ✓', {
+        icon: 'check_circle',
+        type: 'success',
+        autoCloseDelay: 3000,
+      });
+    }
   });
 
   child.on('error', err => {
     const msg = err.message || 'Unknown error';
+    appendToOutput(`> Error: ${msg}`, true);
     addEntry(scriptName, msg);
     dialog.close();
     showToast(`${getTranslation('simple_toast_error') || 'Failed'}: ${friendlyName}`, {
+      icon: 'error',
+      type: 'error',
       action: getTranslation('simple_toast_view_details') || 'View Details',
       autoCloseDelay: 8000,
-      className: 'snackbar-error',
       onActionClick: () => {
         const errDialog = document.createElement('md-dialog');
         errDialog.innerHTML = `
@@ -214,21 +292,21 @@ async function runSimpleAction(scriptName, item, spinner) {
   });
 }
 
-function wireVersionCard() {
-  const card = document.getElementById('version-card');
-  if (!card) return;
-  card.addEventListener('click', () => {
-    const sw = document.getElementById('dev-mode-switch');
-    openRecentActivity(sw ? sw.selected : false);
-  });
-}
-
 function wireRefreshButton() {
   const btn = document.getElementById('refresh-btn');
   if (!btn) return;
   btn.addEventListener('click', async () => {
     btn.disabled = true;
-    await refreshDevice();
+    await Promise.all([refreshDevice(), refreshKeyboxStatus()]);
     btn.disabled = false;
+  });
+}
+
+function wireKeyboxCard() {
+  const card = document.getElementById('keybox-card');
+  if (!card) return;
+  card.addEventListener('click', () => {
+    const sw = document.getElementById('dev-mode-switch');
+    openRecentActivity(sw ? sw.selected : false);
   });
 }

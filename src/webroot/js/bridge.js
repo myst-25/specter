@@ -86,7 +86,7 @@ export function runScriptRaw(command) {
     window[cbName] = function (code, stdout, stderr) {
       delete window[cbName];
       if (typeof code === 'number') {
-        resolve({ stdout: stdout || '', stderr: stderr || '' });
+        resolve({ code, stdout: stdout || '', stderr: stderr || '' });
         return;
       }
       if (!code) { resolve({ stdout: '', stderr: '' }); return; }
@@ -150,12 +150,12 @@ export function spawnScript(scriptName, type = 'feature') {
     const cmd = `sh '${scriptPath}'`;
     let timedOut = false;
     const t = setTimeout(() => { timedOut = true; child.emit('error', new Error('timeout')); }, EXEC_TIMEOUT_MS);
-    runScriptRaw(cmd).then(({ stdout, stderr }) => {
+    runScriptRaw(cmd).then(({ code, stdout, stderr }) => {
       if (timedOut) return;
       clearTimeout(t);
       if (stdout) stdout.split('\n').forEach(l => l && child.stdout.emit('data', l));
       if (stderr) stderr.split('\n').forEach(l => l && child.stderr.emit('data', l));
-      child.emit('exit', 0);
+      child.emit('exit', code);
     }).catch(e => { if (!timedOut) { clearTimeout(t); child.emit('error', e); } });
   }
   return child;

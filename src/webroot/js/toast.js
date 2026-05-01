@@ -1,15 +1,21 @@
 export function showToast(message, options = {}) {
-  const { action, autoCloseDelay = 3000, onActionClick, className } = options;
+  const { action, icon, type, autoCloseDelay = 3000, onActionClick, className } = options;
 
   const toast = document.createElement('div');
-  toast.className = 'md-toast' + (className ? ' ' + className : '');
+  toast.className = 'md-toast' + (className ? ' ' + className : '') + (type ? ' md-toast--' + type : '');
   toast.innerHTML = `
+    ${icon ? `<md-icon class="md-toast__icon">${icon}</md-icon>` : ''}
     <span class="md-toast__message">${message}</span>
-    ${action ? `<button class="md-toast__action">${action}</button>` : ''}
+    <div class="md-toast__actions">
+      ${action ? `<button class="md-toast__action">${action}</button>` : ''}
+      <button class="md-toast__close" aria-label="Close"><md-icon>close</md-icon></button>
+    </div>
   `;
 
   document.body.appendChild(toast);
   requestAnimationFrame(() => toast.classList.add('md-toast--open'));
+
+  toast.querySelector('.md-toast__close').onclick = () => close(toast);
 
   if (action && onActionClick) {
     toast.querySelector('.md-toast__action').onclick = () => {

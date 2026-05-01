@@ -13,3 +13,5 @@ Module/webroot/json/device-info.json
 Module/webroot/lang/source/string.json
 string.yml
 yurikey-main
+module/
+checklist.md

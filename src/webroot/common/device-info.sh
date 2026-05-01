@@ -1,13 +1,15 @@
 #!/system/bin/sh
+# Strip webroot/common/<script> to reach module root (3 levels)
 MODDIR="${0%/*}"
 MODDIR="${MODDIR%/*}"
 MODDIR="${MODDIR%/*}"
 . "$MODDIR/lib/common.sh"
 
-INFO_PATH="$MODDIR/webroot/json/device-info.json"
+INFO_PATH="$MODDIR/webroot/json/info.json"
 
-_android_ver=$(getprop ro.build.version.release)
-_kernel_ver=$(uname -r)
+_android_ver=$(_escape_json "$(getprop ro.build.version.release)")
+_kernel_ver=$(_escape_json "$(uname -r)")
+_version=$(_escape_json "$(grep '^version=' "$MODDIR/module.prop" | cut -d'=' -f2)")
 
 # Root Implementation
 # Strategy: kernel-level root providers first, then userspace
@@ -32,7 +34,8 @@ cat <<EOF > "$INFO_PATH"
 {
   "android": "$_android_ver",
   "kernel": "$_kernel_ver",
-  "root": "$_root_type"
+  "root": "$_root_type",
+  "version": "$_version"
 }
 EOF
-unset _android_ver _kernel_ver _root_type
+unset _android_ver _kernel_ver _root_type _version

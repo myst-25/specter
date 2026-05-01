@@ -7,6 +7,7 @@
   "nav_settings": "Settings",
 
   "home_version": "Module Version",
+  "home_keybox_status": "Keybox Status",
   "home_android": "Android",
   "home_kernel": "Kernel",
   "home_root": "Root",
@@ -19,19 +20,21 @@
   "home_clock_time": "Time",
 
   "menu_keybox": "Keybox",
-  "menu_gms_section": "GMS",
-  "menu_import_keybox": "Set Up Yuri Keybox",
+  "menu_google_services": "Google Services",
+  "menu_tricky_store": "Tricky Store",
+  "menu_import_keybox": "Install Yuri Keybox",
   "menu_import_keybox_desc": "Downloads and installs remote keybox to Tricky Store",
   "menu_force_clear": "Force Stop & Clear Play Store",
   "menu_force_clear_desc": "Force-stops Play Store and wipes its data cache",
-  "menu_target": "Set Up target.txt",
+  "menu_target": "Set target.txt",
   "menu_target_desc": "Generates Tricky Store target.txt with all installed apps",
   "menu_necessary": "Only Necessary Apps",
   "menu_necessary_desc": "Sets only fixed targets — no dynamic package scanning",
-  "menu_patch": "Set Up Security Patch",
+  "menu_patch": "Set Security Patch",
   "menu_patch_desc": "Writes spoofed security patch date to Tricky Store",
 
-  "advance_menu_title_extended": "Detection & Fixes",
+  "advance_menu_title_extended": "Detection Fixes",
+  "advance_menu_title_config": "Module Configs",
   "advance_tee_section": "Fix TEE: OnePlus, RedMagic, Realme, Oppo…",
   "advance_clear_all_detection_traces": "Clear All Detection Traces",
   "advance_clear_all_detection_traces_desc": "Deletes detector app data, temp files, resets props, removes ODEX",
@@ -48,7 +51,7 @@
   "advance_fix_detect_pif": "Fix PIF Detection",
   "advance_fix_pif_desc": "Removes PIF-related properties via resetprop",
   "advance_fix_detect_recovery_file": "Fix Recovery File Detection",
-  "advance_fix_recovery_desc": "Deletes /sdcard/TWRP directory",
+  "advance_fix_recovery_desc": "Deletes /storage/emulated/0/TWRP directory",
   "advance_kill_all": "Kill All Processes",
   "advance_kill_all_desc": "Force-stops and clears data for all known detector apps",
   "advance_upd_yurirka": "Update RKA Config",
@@ -72,6 +75,7 @@
   "theme_preset_forest": "Forest",
   "theme_preset_sunset": "Sunset",
   "theme_preset_violet": "Violet",
+  "theme_preset_monet": "System",
 
   "clock_format_auto": "Auto (Device)",
   "clock_format_24h": "24-hour",
@@ -84,6 +88,7 @@
   "update_note": "Join Telegram or check GitHub for contributions and technical discussions.",
 
   "settings_advanced": "Advanced",
+  "terminal_clear": "Clear",
   "settings_dev_mode": "Developer Mode",
   "settings_dev_mode_desc": "Show raw script names and terminal output",
 
@@ -100,7 +105,7 @@
   "dialog_clear": "Clear",
   "dialog_close": "Close",
 
-  "toast_success": "Done ✓",
+  "toast_success": "Done",
   "toast_error": "Failed",
   "toast_timeout": "Timed out — check your module installation",
 

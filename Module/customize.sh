@@ -1,56 +1,91 @@
 . "$MODPATH/lib/common.sh"
 . "$MODPATH/lib/urls.sh"
+. "$MODPATH/lib/paths.sh"
 
+ui_print ""
+ui_print "*********************************"
+ui_print "*****Yuri Keybox Installer*******"
+ui_print "*********************************"
+ui_print ""
+
+if [ -d "/data/adb/modules/yurikey" ]; then
+  touch /data/adb/modules/yurikey/remove
+  ui_print "- Removed outdated module (lowercase 'yurikey')"
+fi
+
+if [ ! -d "/data/adb/modules/tricky_store" ] && [ ! -d "/data/adb/modules_update/tricky_store" ]; then
+  ui_print "- Error: Tricky Store dependency is not installed"
+  ui_print "- Please install Tricky Store first."
+  ui_print "- After installing Tricky Store, install the keybox from the action button or WebUI."
+  return 0
+fi
+
+if [ -d "/data/adb/Yurikey/bin" ]; then
+  rm -rf /data/adb/Yurikey/bin
+  ui_print "- Cleaned up old binary directory"
+fi
+
+DECODE_FILE="$TRICKY_DIR/keybox_decode"
 TEMP_FILE="$MODPATH/keybox.tmp"
 
-download "$KEYBOX_URL" > "$TEMP_FILE" 2>/dev/null
-if [ -f "$TEMP_FILE" ] && [ -s "$TEMP_FILE" ]; then
-    TRICKY_DIR="/data/adb/tricky_store"
-    mkdir -p "$TRICKY_DIR"
-    TARGET_FILE="$TRICKY_DIR/keybox.xml"
-    BACKUP_FILE="$TRICKY_DIR/keybox.xml.bak"
+if check_network; then
+  ui_print "- Fetching remote keybox..."
+  download "$KEYBOX_URL" > "$TEMP_FILE"
 
-    if [ -f "$TARGET_FILE" ]; then
-        if ! grep -q "yuriiroot" "$TARGET_FILE" 2>/dev/null; then
-            cp "$TARGET_FILE" "$BACKUP_FILE"
-        fi
-    fi
+  if [ ! -f "$TEMP_FILE" ] || [ ! -s "$TEMP_FILE" ]; then
+      ui_print "- Error: Keybox download failed. You can upload a keybox manually via the WebUI."
+      rm -f "$TEMP_FILE"
+  else
+      mkdir -p "$TRICKY_DIR"
 
-    if base64 -d "$TEMP_FILE" > "$TARGET_FILE" 2>/dev/null; then
-        ui_print "- Keybox installed successfully"
-    else
-        ui_print "- Error: Base64 decode failed"
-    fi
-    rm -f "$TEMP_FILE"
+      if ! base64 -d "$TEMP_FILE" > "$DECODE_FILE" 2>/dev/null; then
+          ui_print "- Error: Downloaded keybox is corrupted or invalid. Try again later."
+          rm -f "$TEMP_FILE"
+      else
+          if [ -f "$TARGET_FILE" ]; then
+              if cmp -s "$TARGET_FILE" "$DECODE_FILE"; then
+                  ui_print "- Current keybox is already up to date. No changes needed."
+                  rm -f "$TEMP_FILE" "$DECODE_FILE"
+              else
+                  if ! grep -q "yuriiroot" "$TARGET_FILE" 2>/dev/null; then
+                      ui_print "- Previous keybox was not installed by Yuri Keybox."
+                      ui_print "- Creating a backup keybox..."
+                      cp "$TARGET_FILE" "$BACKUP_FILE"
+                  fi
+                  mv "$DECODE_FILE" "$TARGET_FILE"
+                  rm -f "$TEMP_FILE"
+                  ui_print "- Keybox installed successfully"
+              fi
+          else
+              ui_print "- No keybox found! Creating a new one..."
+              mv "$DECODE_FILE" "$TARGET_FILE"
+              rm -f "$TEMP_FILE"
+              ui_print "- Keybox installed successfully"
+          fi
+      fi
+  fi
 else
-    ui_print "- Warning: Keybox download failed (non-fatal)"
-    rm -f "$TEMP_FILE"
+  ui_print "- No internet connection detected. Skipping keybox download."
+  ui_print "- You can download a keybox later from the Actions tab."
 fi
 
 mkdir -p "$MODPATH/webroot/json"
-RUNTIME_DIR="${MODPATH//modules_update/modules}"
+RUNTIME_DIR=$(echo "$MODPATH" | sed 's|/modules_update/|/modules/|')
 cat > "$MODPATH/webroot/json/module_paths.json" <<JSON
 {"MODDIR": "$RUNTIME_DIR"}
 JSON
 unset RUNTIME_DIR
 
-case "$ARCH" in
-    arm64) RKA_ARCH="arm64-v8a" ;;
-    arm)   RKA_ARCH="armeabi-v7a" ;;
-    x64)   RKA_ARCH="x86_64" ;;
-    x86)   RKA_ARCH="x86" ;;
-    *)     RKA_ARCH="arm64-v8a" ;;
-esac
-mkdir -p "$MODPATH/rka/$RKA_ARCH"
-download "$SQLITE_BASE_URL/${RKA_ARCH}/sqlite3" > "$MODPATH/rka/$RKA_ARCH/sqlite3" 2>/dev/null && chmod 755 "$MODPATH/rka/$RKA_ARCH/sqlite3" \
-    || ui_print "- Warning: RKA sqlite3 download failed (non-fatal)"
-
-if [ -f "$MODPATH/features/migrate.sh" ]; then
-    sh "$MODPATH/features/migrate.sh" || ui_print "- Warning: migration incomplete"
+# Clean up v3 files from live module path
+if [ -d "/data/adb/modules/Yurikey" ]; then
+  if [ -d "/data/adb/modules/Yurikey/Yuri" ] || [ -f "/data/adb/modules/Yurikey/webroot/common/clear_all_detection_traces.sh" ] || [ -f "/data/adb/modules/Yurikey/webroot/common/widevinel1.sh" ] || [ -f "/data/adb/modules/Yurikey/webroot/common/lsposed2.sh" ] || [ -f "/data/adb/modules/Yurikey/webroot/common/boot_hash.sh" ]; then
+    ui_print "- Detected outdated files from YuriKey v3"
+    ui_print "- Cleaning up obsolete files..."
+  fi
+  rm -rf /data/adb/modules/Yurikey 2>/dev/null
+  ui_print "- Removed old YuriKey v3 module directory"
 fi
 
-if [ -f "$MODPATH/webroot/common/device-info.sh" ]; then
-    sh "$MODPATH/webroot/common/device-info.sh"
-fi
+run_device_info "$TMPDIR" "$MODPATH"
 
 return 0
