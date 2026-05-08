@@ -871,12 +871,287 @@ md-dialog {
   overflow: hidden;
 }
 
-md-dialog [slot="content"] {
+#progress-dialog [slot="content"] {
   display: flex;
   flex-direction: column;
   justify-content: center;
   min-height: 200px;
 }
+
+.danger-dialog [slot="headline"] {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+}
+
+.danger-dialog-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--md-sys-color-error-container);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.danger-dialog-icon md-icon {
+  font-size: 24px;
+  color: var(--md-sys-color-on-error-container);
+  font-family: 'Material Icons';
+}
+
+.danger-dialog [slot="content"] {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 16px 0;
+  min-height: 0;
+}
+
+.danger-dialog-msg {
+  margin: 0;
+  text-align: center;
+  color: var(--md-sys-color-on-surface-variant);
+  line-height: 1.5;
+  max-width: 320px;
+}
+
+.danger-dialog-confirm {
+  --md-filled-button-container-color: var(--md-sys-color-error);
+  --md-filled-button-label-text-color: var(--md-sys-color-on-error);
+  --md-filled-button-hover-state-layer-color: var(--md-sys-color-on-error);
+  --md-filled-button-focus-state-layer-color: var(--md-sys-color-on-error);
+  --md-filled-button-pressed-state-layer-color: var(--md-sys-color-on-error);
+}
+
+.fb-dialog {
+  width: 400px;
+  max-width: calc(100vw - 32px);
+}
+
+.fb-headline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 20px 0;
+}
+
+.fb-back-btn {
+  width: 32px;
+  height: 32px;
+  --md-icon-button-icon-size: 20px;
+}
+
+.fb-path {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.8125rem;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.fb-content {
+  padding: 4px 16px 8px;
+  max-height: 380px;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.fb-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.fb-row:hover {
+  background: var(--md-sys-color-surface-container-high);
+}
+
+.fb-row--selected {
+  background: var(--md-sys-color-primary-container);
+}
+
+.fb-row--selected:hover {
+  background: var(--md-sys-color-primary-container);
+}
+
+.fb-row-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.fb-row-icon--folder {
+  background: var(--md-sys-color-primary-container);
+}
+
+.fb-row-icon--file {
+  background: var(--md-sys-color-secondary-container);
+}
+
+.fb-row-icon-inner {
+  font-size: 16px;
+  font-family: 'Material Icons';
+}
+
+.fb-row-icon--folder .fb-row-icon-inner {
+  color: var(--md-sys-color-on-primary-container);
+}
+
+.fb-row-icon--file .fb-row-icon-inner {
+  color: var(--md-sys-color-on-secondary-container);
+}
+
+.fb-row-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.875rem;
+}
+
+.fb-chevron {
+  font-size: 18px;
+  color: var(--md-sys-color-on-surface-variant);
+  font-family: 'Material Icons';
+}
+
+.fb-empty {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: 0.8125rem;
+}
+
+.fb-show-all {
+  text-align: center;
+  padding: 8px;
+  font-size: 0.75rem;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.fb-show-all span {
+  cursor: pointer;
+  color: var(--md-sys-color-primary);
+  text-decoration: underline;
+}
+
+.fb-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 20px;
+  min-height: 0;
+}
+
+.fb-actions {
+  padding: 0 20px 16px;
+}
+
+.fb-select-btn {
+  --md-filled-button-container-shape: 12px;
+}
+
+.private-dialog [slot="content"] {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 24px 16px;
+  min-height: 0;
+}
+
+.private-dialog-msg {
+  margin: 0;
+  font-size: 0.9375rem;
+  text-align: center;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.detected-dialog [slot="headline"] {
+  text-align: center;
+}
+
+.detected-dialog-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  padding: 8px 16px;
+  min-height: 0;
+}
+
+.detected-dialog-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--md-sys-color-primary-container);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  flex-shrink: 0;
+}
+
+.detected-dialog-icon md-icon {
+  font-size: 24px;
+  color: var(--md-sys-color-on-primary-container);
+  font-family: 'Material Icons';
+}
+
+.detected-dialog-status {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  margin: 4px 0;
+  color: var(--md-sys-color-on-surface);
+}
+
+.detected-dialog-chip-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0;
+}
+
+.detected-dialog-desc {
+  font-size: 0.75rem;
+  color: var(--md-sys-color-on-surface-variant);
+  margin: 4px 0;
+}
+
+.detected-dialog-apply {
+  --md-filled-button-container-shape: 12px;
+}
+
+.error-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 0;
+}
+
+.error-dialog-content .terminal {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.dev-action-dialog [slot="content"] {
+  min-height: 0;
+}
+
 md-filled-tonal-button {
   --md-filled-tonal-button-container-shape: 12px;
 }

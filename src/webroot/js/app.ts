@@ -22,17 +22,23 @@ let devMode = false;
 async function confirmDestructive(friendlyName: string): Promise<boolean> {
   return new Promise(resolve => {
     const dialog = document.createElement('md-dialog');
+    dialog.className = 'danger-dialog';
     dialog.setAttribute('type', 'alert');
     dialog.innerHTML = `
-      <div slot="headline">${getTranslation('tools_danger_zone') || 'Danger Zone'}</div>
-      <div slot="content" style="padding:8px 24px 16px">
-        <p style="margin:0;font-size:0.9375rem">${getTranslation('danger_confirm_msg') || 'This action may affect your device. Are you sure?'}</p>
-        <p style="margin:8px 0 0;font-size:0.8125rem;color:var(--md-sys-color-on-surface-variant)"><strong>${escapeHtml(friendlyName)}</strong></p>
+      <div slot="headline">
+        <span class="danger-dialog-icon"><md-icon>warning</md-icon></span>
+        ${escapeHtml(friendlyName)}
+      </div>
+      <div slot="content">
+        <p class="danger-dialog-msg">
+          ${getTranslation('danger_confirm_msg') || 'This action may affect your device. Are you sure?'}
+        </p>
       </div>
       <div slot="actions">
         <md-text-button id="danger-cancel">${getTranslation('dialog_cancel') || 'Cancel'}</md-text-button>
-        <div class="spacer"></div>
-        <md-filled-tonal-button id="danger-confirm" style="--md-filled-tonal-button-container-color:var(--md-sys-color-error);--md-filled-tonal-button-label-text-color:var(--md-sys-color-on-error)">${getTranslation('danger_confirm') || 'Continue'}</md-filled-tonal-button>
+        <md-filled-button id="danger-confirm" class="danger-dialog-confirm">
+          ${getTranslation('danger_confirm') || 'Proceed'}
+        </md-filled-button>
       </div>
     `;
     document.body.appendChild(dialog);
@@ -230,15 +236,16 @@ async function runDevAction(scriptName: string, _item: HTMLElement, _spinner: HT
   const lines: string[] = [];
   appendToOutput(`> ${scriptName}`);
   const dialog = document.createElement('md-dialog');
+  dialog.className = 'dev-action-dialog';
   dialog.innerHTML = `
     <div slot="headline">${escapeHtml(scriptName)}</div>
     <div slot="content"><div class="terminal"><pre id="live-output"></pre></div></div>
     <div slot="actions">
-      <md-text-button class="dialog-close">${getTranslation('dialog_close') || 'Close'}</md-text-button>
+      <md-text-button class="dev-action-close">${getTranslation('dialog_close') || 'Close'}</md-text-button>
     </div>
   `;
   document.body.appendChild(dialog);
-  dialog.querySelector('.dialog-close')!.addEventListener('click', () => (dialog as any).close());
+  dialog.querySelector('.dev-action-close')!.addEventListener('click', () => (dialog as any).close());
   dialog.addEventListener('close', () => document.body.removeChild(dialog));
   (dialog as any).show();
   const pre = dialog.querySelector('#live-output');
@@ -498,15 +505,15 @@ async function openCustomKeyboxDialog() {
 
     const privateChoice = await new Promise<boolean>(resolve => {
       const pd = document.createElement('md-dialog');
-      pd.setAttribute('type', 'alert');
+      pd.className = 'private-dialog';
       pd.innerHTML = `
         <div slot="headline">${t('custom_kb_title', 'Custom Keybox')}</div>
-        <div slot="content" style="min-height:0;padding:8px 24px 16px">
-          <p style="margin:0;font-size:0.9375rem">${t('custom_kb_private_ask', 'Is this a private keybox?')}</p>
+        <div slot="content">
+          <p class="private-dialog-msg">${t('custom_kb_private_ask', 'Is this a private keybox?')}</p>
         </div>
         <div slot="actions">
           <md-text-button id="kb-pri-no" value="no">${t('custom_kb_no', 'No')}</md-text-button>
-          <md-filled-tonal-button id="kb-pri-yes" value="yes">${t('custom_kb_yes', 'Yes')}</md-filled-tonal-button>
+          <md-text-button id="kb-pri-yes" value="yes">${t('custom_kb_yes', 'Yes')}</md-text-button>
         </div>
       `;
       document.body.appendChild(pd);
@@ -566,27 +573,29 @@ async function openCustomKeyboxDialog() {
       }
 
       const detectedDialog = document.createElement('md-dialog');
+      detectedDialog.className = 'detected-dialog';
+      detectedDialog.setAttribute('type', 'alert');
       detectedDialog.innerHTML = `
         <div slot="headline">${t('custom_kb_detected', 'Keybox Detected')}</div>
-        <div slot="content" style="text-align:center;padding:8px 16px">
+        <div slot="content" class="detected-dialog-content">
           ${catalogInfo ? `
-            <div class="li-icon" style="margin:0 auto 8px"><md-icon>verified_user</md-icon></div>
-            <p style="font-size:0.9375rem;font-weight:500;margin:4px 0">${t('custom_kb_known', 'Known Keybox')}</p>
-            <div style="display:inline-flex;align-items:center;gap:8px;margin:4px 0">
+            <span class="detected-dialog-icon"><md-icon>verified_user</md-icon></span>
+            <p class="detected-dialog-status">${t('custom_kb_known', 'Known Keybox')}</p>
+            <div class="detected-dialog-chip-row">
               <md-chip style="--md-chip-label-text-color:var(--md-sys-color-primary)">${escapeHtml(catalogInfo.source)}</md-chip>
               <span style="font-size:0.8125rem;color:var(--md-sys-color-on-surface-variant)">${escapeHtml(catalogInfo.version)}</span>
             </div>
             <md-chip style="--md-chip-label-text-color:${catalogInfo.revoked ? 'var(--md-sys-color-error)' : 'var(--md-sys-color-tertiary)'}">${catalogInfo.revoked ? t('custom_kb_revoked', 'Revoked') : t('custom_kb_active', 'Active')}</md-chip>
           ` : `
-            <div class="li-icon" style="margin:0 auto 8px"><md-icon>search_off</md-icon></div>
-            <p style="font-size:0.9375rem;font-weight:500;margin:4px 0">${t('custom_kb_not_found', 'Not Found in Catalog')}</p>
-            <p style="font-size:0.75rem;color:var(--md-sys-color-on-surface-variant);margin:4px 0">${t('custom_kb_not_found_desc', 'This keybox could not be matched to any known source')}</p>
+            <span class="detected-dialog-icon"><md-icon>search_off</md-icon></span>
+            <p class="detected-dialog-status">${t('custom_kb_not_found', 'Not Found in Catalog')}</p>
+            <p class="detected-dialog-desc">${t('custom_kb_not_found_desc', 'This keybox could not be matched to any known source')}</p>
           `}
         </div>
         <div slot="actions">
           <md-text-button id="kb-detect-cancel">${t('dialog_close', 'Cancel')}</md-text-button>
           <div class="spacer"></div>
-          <md-filled-tonal-button id="kb-detect-apply">${t('custom_kb_apply_confirm', 'Apply')}</md-filled-tonal-button>
+          <md-filled-button id="kb-detect-apply" class="detected-dialog-apply">${t('custom_kb_apply_confirm', 'Apply')}</md-filled-button>
         </div>
       `;
       document.body.appendChild(detectedDialog);

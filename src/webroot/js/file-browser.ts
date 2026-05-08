@@ -16,16 +16,17 @@ export async function openFileBrowser(onSelect: (path: string) => void) {
   let allFiles = false;
 
   const dialog = document.createElement('md-dialog');
-  dialog.style.width = '400px';
+  dialog.className = 'fb-dialog';
 
   function rowHTML(path: string, icon: string, name: string, isFolder: boolean, isSelected: boolean): string {
-    const bg = isSelected ? ';background:var(--md-sys-color-primary-container)' : '';
-    return `<div class="fb-row" data-path="${path}" style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;cursor:pointer;transition:background 0.15s${bg}" onmouseenter="this.style.background='var(--md-sys-color-surface-container-high)'" onmouseleave="this.style.background='${isSelected ? 'var(--md-sys-color-primary-container)' : 'transparent'}'">
-      <span style="width:32px;height:32px;border-radius:8px;background:${isFolder ? 'var(--md-sys-color-primary-container)' : 'var(--md-sys-color-secondary-container)'};display:flex;align-items:center;justify-content:center;flex-shrink:0">
-        <md-icon style="font-size:16px;color:${isFolder ? 'var(--md-sys-color-on-primary-container)' : 'var(--md-sys-color-on-secondary-container)'};font-family:'Material Icons'">${icon}</md-icon>
+    const cls = 'fb-row' + (isFolder ? '' : ' fb-row--file') + (isSelected ? ' fb-row--selected' : '');
+    const iconCls = 'fb-row-icon' + (isFolder ? ' fb-row-icon--folder' : ' fb-row-icon--file');
+    return `<div class="${cls}" data-path="${escapeHtml(path)}">
+      <span class="${iconCls}">
+        <md-icon class="fb-row-icon-inner">${icon}</md-icon>
       </span>
-      <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.875rem">${name}</span>
-      ${isFolder ? '<md-icon style="font-size:18px;color:var(--md-sys-color-on-surface-variant);font-family:\'Material Icons\'">chevron_right</md-icon>' : ''}
+      <span class="fb-row-name">${escapeHtml(name)}</span>
+      ${isFolder ? '<md-icon class="fb-chevron">chevron_right</md-icon>' : ''}
     </div>`;
   }
 
@@ -33,21 +34,21 @@ export async function openFileBrowser(onSelect: (path: string) => void) {
     const dirs = entries.filter(e => e.isFolder);
     const files = entries.filter(e => !e.isFolder && (allFiles || e.name.endsWith('.xml') || e.name.endsWith('.bak')));
     dialog.innerHTML = `
-      <div slot="headline" style="padding:16px 20px 0;font-size:0.9375rem;font-weight:500;display:flex;align-items:center;gap:8px">
-        ${currentPath !== '/sdcard' ? '<md-icon-button id="fb-back" style="width:32px;height:32px;--md-icon-button-icon-size:20px"><md-icon>arrow_back</md-icon></md-icon-button>' : ''}
-        <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.8125rem;color:var(--md-sys-color-on-surface-variant)">${currentPath}</span>
+      <div slot="headline" class="fb-headline">
+        ${currentPath !== '/sdcard' ? '<md-icon-button id="fb-back" class="fb-back-btn"><md-icon>arrow_back</md-icon></md-icon-button>' : ''}
+        <span class="fb-path">${escapeHtml(currentPath)}</span>
       </div>
-      <div slot="content" style="padding:4px 16px 8px;max-height:380px;overflow-y:auto">
+      <div slot="content" class="fb-content">
         ${currentPath !== '/' && currentPath !== '/sdcard' ? rowHTML('..', 'folder_open', '..', true, false) : ''}
         ${dirs.map(d => rowHTML(d.path, 'folder', d.name, true, false)).join('')}
-        ${files.length === 0 && dirs.length === 0 ? '<div style="text-align:center;padding:32px 16px;color:var(--md-sys-color-on-surface-variant);font-size:0.8125rem">No XML files found</div>' : ''}
+        ${files.length === 0 && dirs.length === 0 ? '<div class="fb-empty">No XML files found</div>' : ''}
         ${files.map(f => rowHTML(f.path, 'description', f.name, false, selectedFile === f.path)).join('')}
-        ${!allFiles && files.length < entries.length ? '<div style="text-align:center;padding:8px;font-size:0.75rem;color:var(--md-sys-color-on-surface-variant)"><span id="fb-show-all" style="cursor:pointer;color:var(--md-sys-color-primary);text-decoration:underline">Show all files</span></div>' : ''}
+        ${!allFiles && files.length < entries.length ? '<div class="fb-show-all"><span id="fb-show-all">Show all files</span></div>' : ''}
       </div>
-      <div slot="actions" style="padding:0 20px 16px">
+      <div slot="actions" class="fb-actions">
         <md-text-button id="fb-cancel">${t('dialog_close', 'Close')}</md-text-button>
         <div class="spacer"></div>
-        <md-filled-tonal-button id="fb-select" ${selectedFile ? '' : 'disabled'}>${t('custom_kb_apply', 'Select')}</md-filled-tonal-button>
+        <md-filled-button id="fb-select" class="fb-select-btn" ${selectedFile ? '' : 'disabled'}>${t('custom_kb_apply', 'Select')}</md-filled-button>
       </div>
     `;
 
@@ -92,10 +93,10 @@ export async function openFileBrowser(onSelect: (path: string) => void) {
 
   async function loadDir(path: string) {
     dialog.innerHTML = `
-      <div slot="headline" style="padding:16px 20px 0;font-size:0.9375rem;font-weight:500">
-        <span style="font-size:0.8125rem;color:var(--md-sys-color-on-surface-variant)">${path}</span>
+      <div slot="headline" class="fb-headline">
+        <span class="fb-path">${escapeHtml(path)}</span>
       </div>
-      <div slot="content" style="display:flex;align-items:center;justify-content:center;padding:48px 20px">
+      <div slot="content" class="fb-loading">
         <md-circular-progress indeterminate></md-circular-progress>
       </div>
     `;
@@ -123,4 +124,8 @@ export async function openFileBrowser(onSelect: (path: string) => void) {
   }
 
   await loadDir(currentPath);
+}
+
+function escapeHtml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }

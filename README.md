@@ -2,8 +2,8 @@
 
 <p align="center">
   <img src="./screenshots/home.png" width="22%" alt="Home">
-  <img src="./screenshots/setup.png" width="22%" alt="Setup">
-  <img src="./screenshots/maintain.png" width="22%" alt="Maintain">
+  <img src="./screenshots/tools.png" width="22%" alt="Tools">
+  <img src="./screenshots/control.png" width="22%" alt="Control">
   <img src="./screenshots/settings.png" width="22%" alt="Settings">
 </p>
 

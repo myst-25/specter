@@ -178,6 +178,18 @@
 - `package_list.sh`: `GMS_KILL_LIST` deduplicated and reorganized — removed redundant entries, added safetycore.
 - `disable_bootloader_spoofer` respects user's install-time conflict choice flag.
 
+### Dialog Redesign (Material Design 3)
+- `confirmDestructive`: Rewritten per M3 alert dialog spec — added `warning` icon in error-container circle, action name as headline, `md-filled-button` with error tokens for confirm action. Removed all inline styles.
+- `openFileBrowser`: Complete rewrite — replaced 40+ inline style attributes with CSS classes, removed inline `onmouseenter`/`onmouseleave` event handlers (now CSS `:hover`), fixed button from `md-filled-tonal-button` to `md-filled-button`, added XSS-safe `escapeHtml()`.
+- `privateChoice`: Both buttons changed to `md-text-button` (equal binary choice), removed `type="alert"`, removed all inline styles.
+- `detectedDialog`: Added `type="alert"`, changed confirm button to `md-filled-button`, replaced all inline styles with CSS classes.
+- `showErrorDialog`: Added `type="alert"` for proper alertdialog ARIA role, renamed generic class.
+- `runDevAction`: Scoped generic class names to avoid conflicts.
+- `danger_confirm` translation changed from `"Continue"` to `"Proceed"` across all 5 languages.
+
+### README
+- Updated screenshot grid to match new nav structure — replaced `setup.png`/`maintain.png` with `tools.png`/`control.png`.
+
 ### Documentation
 - Added Legal disclaimer — educational purposes only, no liability for misuse.
 - Added Warning section — outlines risks (warranty void, boot loops, app bans, etc.).
