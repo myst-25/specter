@@ -1,5 +1,5 @@
-import { shellEscape, fetchJson, setText } from './utils.js';
-import { runScript, exec } from './bridge.js';
+import { fetchJson, setText } from './utils.js';
+import { runScript } from './bridge.js';
 import { appendToOutput } from './terminal.js';
 import { API_URLS } from './constants.js';
 import { getTranslation } from './i18n.js';
@@ -51,12 +51,10 @@ function applyDeviceInfo(data: InfoJson) {
   setText('patch-value', data.security_patch || '—');
 }
 
-function applyFlags(flags: { twrp?: boolean; blacklist?: boolean }) {
+function applyFlags(flags: { twrp?: boolean }) {
   if (!flags) return;
   const recoverySwitch = document.getElementById('toggle-recovery') as any;
   if (recoverySwitch) recoverySwitch.selected = !!flags.twrp;
-  const blacklistSwitch = document.getElementById('blacklist-switch') as any;
-  if (blacklistSwitch) blacklistSwitch.selected = !!flags.blacklist;
 }
 
 function applyKeyboxFormat(format: string) {
@@ -132,19 +130,6 @@ function applyKeyboxStatus(data: KeyboxInfoJson) {
     statusEl.textContent = getTranslation('custom_kb_active') || 'Active';
     statusEl.className = 'keybox-chip keybox-chip--active';
   }
-}
-
-export async function loadBlacklistContent(): Promise<string> {
-  try {
-    const result = await exec('cat /data/adb/Specter/blacklist.txt 2>/dev/null || echo ""');
-    return (result as any).stdout || '';
-  } catch (e) { console.warn('Failed to load blacklist:', e); return ''; }
-}
-
-export async function saveBlacklistContent(content: string) {
-  const result = await exec(`printf '%s' ${shellEscape(content)} | base64 -w0`);
-  const b64 = (result as any).stdout || '';
-  await exec(`mkdir -p /data/adb/Specter && printf '%s' "${b64}" | base64 -d > /data/adb/Specter/blacklist.txt`);
 }
 
 interface ConflictModule {

@@ -63,13 +63,36 @@
 
 ### New Features
 
-- **Binary-level prop deletion** (`common.sh`): new `hexpatch_deleteprop()` function — uses `magiskboot hexpatch` to overwrite property values in `/dev/__properties__/` with random hex, making deletion undetectable at the API level. Falls back to `resetprop --delete` if magiskboot is unavailable. Used by `suspicious_props.sh` for stealthier cleaning.
+- **Binary-level prop deletion** (`common.sh`): new `hexpatch_deleteprop()` function — uses `magickboot hexpatch` to overwrite property values in `/dev/__properties__/` with random hex, making deletion undetectable at the API level. Falls back to `resetprop --delete` if magickboot is unavailable. Used by `suspicious_props.sh` for stealthier cleaning.
 - **AVB header-based vbmeta.size** (`boot_hash.sh`): parses the real AVB0 header from the vbmeta block device to compute `256 + auth_data + aux_data` sizes — more accurate than `blockdev --getsize64` which gives raw partition size.
 - **`ro.boot.vbmeta.invalidate_on_error=yes`** (`boot_hash.sh`): now set alongside the digest for more complete vbmeta prop coverage.
 - **Periodic suspicious props re-cleaning** (`service.sh`): re-runs `suspicious_props.sh` every hour in the background — catches properties that get re-set after boot.
 - **File permission hardening** (`service.sh`): `/proc/cmdline` → 440, `/proc/net/unix` → 440, `install-recovery.sh` → 440, `/system/addon.d` → 750. Gated behind `toggle_boot_hardening`.
+- **Interactive App Targeting overlay** — full-screen Material 3 sub-page replacing SmartMerge:
+  - Searchable app list with filter chips (All / Selected / Not Selected)
+  - 4-state cycling circle: unchecked → bare → ? → ! per app
+  - Selected items always sort to the top
+  - Floating Apply button (`md-fab`) with primary colors
+  - Cloud-hosted app label catalog (rawbin) with version-based caching
+  - Only user-installed apps shown by default; "Show system apps" toggle in three-dot menu (system apps preserve their target.txt state)
+  - **Blacklist mode** — switch to blacklist editing via three-dot menu: header turns error-container, state circles become on/off toggle with block icon, filter chips update, apply writes to `/data/adb/Specter/blacklist.txt`
+  - Native M3 page transition — slides in from right on enter (300ms, `emphasized-decelerate`), slides back right on exit (200ms, `emphasized-accelerate`), matching standard Android drill-in navigation
+  - Magisk DenyList import
+  - Back button with muted `secondary-container` accent
+  - Div-based dropdown menu matching TS Addon styling
+  - Dev mock with 35+ realistic test apps and DenyList data
+- **App Catalog management page** (rawbin) — standalone CRUD interface for maintaining package → app name mappings with sortable table, search, dialogs, bulk JSON import/export, and version-based cache invalidation.
+- **Full catalog caching** — version check (`/apps/version`) before downloading full catalog; cache stores all 592 entries so system apps get names too.
+- **Blacklist consolidated into App Targeting** — removed standalone Blacklist section from Tools page; accessible via overlay's three-dot menu with the same interactive list UI
+- **SmartMerge removed** — replaced entirely by the interactive App Targeting overlay
+- **Code cleanup** — removed dead translation keys (`menu_smartmerge*`, `toast_smartmerge_saved`, `menu_blacklist`, `menu_blacklist_toggle*`), removed unused imports in `device.ts`, removed orphaned `wireBlacklistToggle` from `app.ts`
+- **PlayStrong label fix** — renamed `io.github.mhmrdd.libxposed.ps.passit` from "PassIt" to "PlayStrong" in both the app catalog and RKA error message
+- **Security Patch dialog** — "Set Security Patch" now opens an M3 dialog with a date input field pre-filled with the previous month's 5th; added a trailing `autorenew` icon button to auto-generate the computed date; user can edit before saving
+- **Consistent logging** — App Targeting overlay now logs all operations with `[TARGET]` prefix to the terminal, matching the convention of other feature scripts
 
 ### Bug Fixes
+- **Removed `boot_hash.sh`** — the boot hash (`ro.boot.vbmeta.digest`) is computed automatically by the bootloader/AVB. Overriding it is pointless. Removed the feature script, pipeline entry, all action/service/boot references, control toggles, translation keys, and Tools/Control page entries.
+- **Removed `pif2.sh`** — "Fix PIF Detection" was a one-time cleanup of ROM spoof engine persistent props. The boot-time `block_rom_spoof_engines` already handles this after every reboot. Any module that requires a restart makes the on-demand button redundant. Removed the feature script, wrapper, Tools page entry, and translation keys.
 - **Custom keybox URL: raw file no longer copied on decode failure** (`keybox.sh`) — if the downloaded custom keybox isn't valid base64, the script now restores the backup and exits with an error instead of writing garbage to `keybox.xml`.
 - **`set -e` safety** (`cleanup.sh`, `common.sh`): added `2>/dev/null || true` guards to `resetprop` calls in `cleanup.sh:105-106` and `disable_rom_spoof_engines():370`. Added `|| true` to `apply_boot_hardening` call in `cleanup.sh:110`. Prevents mid-script abort if these commands fail.
 - **Removed dead code** (`common.sh`): `resolve_module_root()` — never called, logic already inlined in `device-info.sh`.

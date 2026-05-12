@@ -126,6 +126,8 @@ if (typeof window.ksu === 'undefined') {
           cb(0, MOCK_DENYLIST, '');
         } else if (cmd.includes(APP_LABELS_CACHE_PATH)) {
           cb(0, '', '');
+        } else if (cmd.includes('blacklist.txt')) {
+          cb(0, 'com.topjohnwu.magisk\ncom.scottyab.rootbeer\n', '');
         } else if (cmd.includes('mkdir')) {
           cb(0, '', '');
         } else if (cmd.includes('cat >')) {
@@ -173,7 +175,13 @@ if (typeof window.ksu === 'undefined') {
       }), { status: 200, headers: { 'Content-Type': 'application/json' } }));
     }
 
-    if (u.includes('rawbin.netlify.app/apps/catalog')) {
+    if (u.includes('rawbin.netlify.app/apps/version')) {
+      return Promise.resolve(new Response(JSON.stringify({ version: 1 }), {
+        status: 200, headers: { 'Content-Type': 'application/json' },
+      }));
+    }
+
+    if (u.includes('rawbin.netlify.app/apps')) {
       return Promise.resolve(new Response(JSON.stringify(MOCK_APP_CATALOG), {
         status: 200, headers: { 'Content-Type': 'application/json' },
       }));

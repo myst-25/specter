@@ -1,7 +1,7 @@
 import './material.js';
 import { initBridge, spawnScript, exec, getModuleDir as getBridgeModuleDir } from './bridge.js';
 import { setModuleDir, migrateLocalStorage, cfgGet, cfgSet, cfgFlush, cfgInvalidate } from './cfg.js';
-import { initDevice, refreshDevice, refreshKeyboxStatus, loadBlacklistContent, saveBlacklistContent, refreshConflictStatus } from './device.js';
+import { initDevice, refreshDevice, refreshKeyboxStatus, refreshConflictStatus } from './device.js';
 import { initNetwork } from './network.js';
 import { initTheme } from './theme.js';
 import { initI18n, getTranslation } from './i18n.js';
@@ -74,8 +74,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   await initI18n();
   await Promise.all([initNetwork(), populateProviders(), loadContributors()]).catch(err => console.warn('Init error:', err));
   await initDevice();
-  wireBlacklistToggle();
   wireTargetApps();
+  wireSecurityPatch();
   wireToggles();
   wireControlToggles();
   wireConflictToggles();
@@ -639,59 +639,72 @@ async function openCustomKeyboxDialog() {
   (dialog as any).show();
 }
 
-function wireBlacklistToggle() {
-  const sw = document.getElementById('blacklist-switch') as any;
-  const editor = document.getElementById('blacklist-editor');
-  const input = document.getElementById('blacklist-input') as any;
-  const saveBtn = document.getElementById('blacklist-save-btn');
-  const resetBtn = document.getElementById('blacklist-reset-btn');
-  if (!sw) return;
-
-  sw.addEventListener('change', async () => {
-    if (sw.selected) {
-      await exec('mkdir -p /data/adb/Specter && touch /data/adb/Specter/blacklist_enabled');
-      if (input) input.value = await loadBlacklistContent();
-      if (editor) editor.style.display = 'block';
-    } else {
-      await exec('rm -f /data/adb/Specter/blacklist_enabled');
-      if (editor) editor.style.display = 'none';
-    }
-  });
-
-  if (sw.selected && editor) {
-    editor.style.display = 'block';
-  }
-
-  if (saveBtn && input) {
-    saveBtn.addEventListener('click', async () => {
-      await saveBlacklistContent(input.value);
-      showToast(t('toast_blacklist_saved', 'Blacklist saved'), { icon: 'check_circle', type: 'success' as any, autoCloseDelay: 2000 });
-    });
-  }
-
-  if (resetBtn) {
-    resetBtn.addEventListener('click', async () => {
-      const defaults = [
-        'com.android.chrome', 'com.google.android.apps.photos', 'com.google.android.youtube',
-        'com.topjohnwu.magisk', 'io.github.vvb2060.mahoshojo', 'io.github.vvb2060.keyattestation',
-        'io.github.qwq233.keyattestation', 'com.eltavine.duckdetector', 'com.rem01gaming.disclosure',
-        'com.reveny.nativechecker', 'com.reveny.environmentchecker', 'com.reveny.rootchecker',
-        'com.scottyab.rootbeer', 'com.scottyab.rootbeer.sample', 'com.kimchangyoun.rootbeerfresh',
-        'com.kimchangyoun.magiskdetector', 'com.zhenxi.hunter', 'icu.nullptr.nativetest',
-        'icu.nullptr.applistdetector', 'com.byxiaorun.detector', 'com.jrummyapps.rootchecker',
-        'com.smlj.rootcheck', 'com.devadvance.rootcloak', 'com.devadvance.rootcloakplus', 'mmrl'
-      ].join('\n');
-      if (input) input.value = defaults;
-      await saveBlacklistContent(defaults);
-      showToast(t('toast_blacklist_reset', 'Blacklist reset to defaults'), { icon: 'check_circle', type: 'success' as any, autoCloseDelay: 2000 });
-    });
-  }
-}
-
 function wireTargetApps() {
   const btn = document.getElementById('target-apps-btn');
   if (!btn) return;
   btn.addEventListener('click', openTargetAppsManager);
+}
+
+function wireSecurityPatch() {
+  const btn = document.getElementById('security-patch-btn');
+  if (!btn) return;
+  btn.addEventListener('click', () => {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = now.getMonth(); // 0-indexed
+    const prevM = m === 0 ? 12 : m;
+    const prevY = m === 0 ? y - 1 : y;
+    const defaultDate = `${prevY}-${String(prevM).padStart(2, '0')}-05`;
+
+    const dialog = document.createElement('md-dialog');
+    dialog.innerHTML = `
+      <div slot="headline">${t('sp_dialog_title', 'Set Security Patch')}</div>
+      <div slot="content" style="min-height:0">
+        <md-outlined-text-field id="sp-input" type="text" label="${t('sp_dialog_label', 'Security Patch Date')}" placeholder="YYYY-MM-DD" maxlength="10" autocapitalize="none" style="width:100%;--md-outlined-text-field-container-shape:14px">
+          <md-icon-button slot="trailing-icon" id="sp-generate" aria-label="${t('sp_generate', 'Generate')}">
+            <md-icon>autorenew</md-icon>
+          </md-icon-button>
+        </md-outlined-text-field>
+      </div>
+      <div slot="actions">
+        <md-text-button id="sp-cancel">${t('dialog_cancel', 'Cancel')}</md-text-button>
+        <md-filled-tonal-button id="sp-save">${t('dialog_save', 'Save')}</md-filled-tonal-button>
+      </div>
+    `;
+    document.body.appendChild(dialog);
+
+    const input = dialog.querySelector('#sp-input') as any;
+    if (input) input.value = defaultDate;
+
+    dialog.querySelector('#sp-generate')!.addEventListener('click', () => {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = now.getMonth();
+      const prevM = m === 0 ? 12 : m;
+      const prevY = m === 0 ? y - 1 : y;
+      input.value = `${prevY}-${String(prevM).padStart(2, '0')}-05`;
+    });
+
+    dialog.querySelector('#sp-cancel')!.addEventListener('click', () => dialog.close());
+    dialog.querySelector('#sp-save')!.addEventListener('click', async () => {
+      const val = input.value.trim();
+      if (!val || !/^\d{4}-\d{2}-\d{2}$/.test(val)) {
+        showToast(t('sp_invalid_date', 'Invalid date format (use YYYY-MM-DD)'), { icon: 'error', type: 'error' as any, autoCloseDelay: 3000 });
+        return;
+      }
+      const content = `system=prop\nboot=${val}\nvendor=${val}`;
+      try {
+        await exec(`cat > /data/adb/tricky_store/security_patch.txt << 'SEOF'\n${content}\nSEOF`);
+        showToast(t('sp_saved', 'Security patch date saved'), { icon: 'check_circle', type: 'success' as any, autoCloseDelay: 2500 });
+        dialog.close();
+      } catch {
+        showToast(t('sp_save_error', 'Failed to save'), { icon: 'error', type: 'error' as any, autoCloseDelay: 4000 });
+      }
+    });
+
+    dialog.addEventListener('close', () => document.body.removeChild(dialog));
+    (dialog as any).show();
+  });
 }
 
 function wireToggles() {
@@ -719,7 +732,6 @@ function wireControlToggles() {
     { id: 'toggle-action_gms', key: 'toggle_action_gms' },
     { id: 'toggle-action_target', key: 'toggle_action_target' },
     { id: 'toggle-action_security_patch', key: 'toggle_action_security_patch' },
-    { id: 'toggle-action_boot_hash', key: 'toggle_action_boot_hash' },
     { id: 'toggle-action_pif', key: 'toggle_action_pif', default: '0' },
   ];
 
@@ -745,7 +757,6 @@ async function refreshControlToggles() {
     { id: 'toggle-action_gms', key: 'toggle_action_gms' },
     { id: 'toggle-action_target', key: 'toggle_action_target' },
     { id: 'toggle-action_security_patch', key: 'toggle_action_security_patch' },
-    { id: 'toggle-action_boot_hash', key: 'toggle_action_boot_hash' },
     { id: 'toggle-action_pif', key: 'toggle_action_pif', default: '0' },
   ];
   for (const { id, key, default: def } of toggles) {

@@ -58,7 +58,6 @@ fi
 
 log "SERVICE" "Running boot-time features..."
 
-_feature_enabled toggle_boot_hash && sh "$MODDIR/features/boot_hash.sh" 2>/dev/null || true
 _feature_enabled toggle_security_patch && sh "$MODDIR/features/security_patch.sh" 2>/dev/null || true
 
 _feature_enabled toggle_suspicious_props && sh "$MODDIR/features/suspicious_props.sh" >/dev/null 2>&1 || true

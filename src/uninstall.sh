@@ -25,19 +25,7 @@ if [ -f "$MIGRATION_MARKER" ]; then
     log "UNINSTALL" "Removed migration marker"
 fi
 
-if [ -f "$BOOT_HASH_FILE" ]; then
-    rm -f "$BOOT_HASH_FILE" 2>/dev/null
-    log "UNINSTALL" "Removed boot hash file"
-fi
-
-if [ -f "$IDFILE" ]; then
-    rm -f "$IDFILE" 2>/dev/null
-    log "UNINSTALL" "Removed RKA ID file"
-fi
-
-# Clean up RKA config in PassIt app data
-_uid=$(id -u 2>/dev/null || echo "")
-if [ -n "$_uid" ]; then
+# Remove RKA config files
   RKA_CFG="/data/user/$_uid/io.github.mhmrdd.libxposed.ps.passit/files/rka_configs.json"
   if [ -f "$RKA_CFG" ]; then
       rm -f "$RKA_CFG" 2>/dev/null

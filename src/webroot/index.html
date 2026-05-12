@@ -157,27 +157,16 @@
               <md-ripple></md-ripple>
             </div>
 
-            <div class="list-item" data-script="security_patch.sh">
+            <div class="list-item" id="security-patch-btn">
               <div class="li-icon"><md-icon aria-hidden="true">security_update_good</md-icon></div>
               <div class="list-item-content">
                 <div class="toggle-text" data-i18n="menu_patch">Set Security Patch</div>
                 <span class="supporting-text" data-i18n="menu_patch_desc">Writes spoofed security patch date to Tricky Store</span>
               </div>
               <div class="spacer"></div>
-              <md-circular-progress indeterminate class="action-spinner hidden"></md-circular-progress>
               <md-ripple></md-ripple>
             </div>
 
-            <div class="list-item" data-script="boot_hash.sh">
-              <div class="li-icon"><md-icon aria-hidden="true">verified</md-icon></div>
-              <div class="list-item-content">
-                <div class="toggle-text" data-i18n="advance_set_verified_boot">Set Verified Boot Hash</div>
-                <span class="supporting-text" data-i18n="advance_set_verified_boot_desc">Reads and writes verified boot hash for attestation</span>
-              </div>
-              <div class="spacer"></div>
-              <md-circular-progress indeterminate class="action-spinner hidden"></md-circular-progress>
-              <md-ripple></md-ripple>
-            </div>
           </div>
 
           <h2 class="list-title" data-i18n="menu_google_services">Google Services</h2>
@@ -187,20 +176,6 @@
               <div class="list-item-content">
                 <div class="toggle-text" data-i18n="menu_force_clear">Force Stop & Clear Play Store</div>
                 <span class="supporting-text" data-i18n="menu_force_clear_desc">Force-stops Play Store and wipes its data cache</span>
-              </div>
-              <div class="spacer"></div>
-              <md-circular-progress indeterminate class="action-spinner hidden"></md-circular-progress>
-              <md-ripple></md-ripple>
-            </div>
-          </div>
-
-          <h2 class="list-title" data-i18n="advance_fix_detect_pif">Fix PIF Detection</h2>
-          <div class="list-container">
-            <div class="list-item" data-script="pif2.sh">
-              <div class="li-icon"><md-icon aria-hidden="true">bug_report</md-icon></div>
-              <div class="list-item-content">
-                <div class="toggle-text" data-i18n="advance_fix_detect_pif">Fix PIF Detection</div>
-                <span class="supporting-text" data-i18n="advance_fix_pif_desc">Removes PIF-related properties via resetprop</span>
               </div>
               <div class="spacer"></div>
               <md-circular-progress indeterminate class="action-spinner hidden"></md-circular-progress>
@@ -252,29 +227,6 @@
               <div class="spacer"></div>
               <md-circular-progress indeterminate class="action-spinner hidden"></md-circular-progress>
               <md-ripple></md-ripple>
-            </div>
-          </div>
-
-          <h2 class="list-title" data-i18n="menu_blacklist">Blacklist</h2>
-          <div class="list-container">
-            <div class="list-item list-item--toggle" id="blacklist-toggle-row">
-              <div class="li-icon"><md-icon aria-hidden="true">block</md-icon></div>
-              <div class="list-item-content">
-                <div class="toggle-text" data-i18n="menu_blacklist_toggle">Filter Blacklisted Apps</div>
-                <span class="supporting-text" data-i18n="menu_blacklist_toggle_desc">Exclude detector apps from target.txt generation</span>
-              </div>
-              <div class="spacer"></div>
-              <md-switch icons id="blacklist-switch"></md-switch>
-              <md-ripple></md-ripple>
-            </div>
-          </div>
-          <div id="blacklist-editor" class="blacklist-editor" style="display:none">
-            <md-outlined-text-field id="blacklist-input" type="textarea" rows="6" style="width:100%;--md-outlined-text-field-container-shape:14px">
-              <div slot="headline" data-i18n="menu_blacklist_edit">Edit blacklist (one package per line)</div>
-            </md-outlined-text-field>
-            <div style="display:flex;gap:8px;margin-top:8px">
-              <md-filled-tonal-button id="blacklist-save-btn" style="flex:1"><span data-i18n="dialog_save">Save</span></md-filled-tonal-button>
-              <md-outlined-button id="blacklist-reset-btn" style="flex:1"><span data-i18n="dialog_reset_defaults">Reset Defaults</span></md-outlined-button>
             </div>
           </div>
 
@@ -449,17 +401,6 @@
               </div>
               <div class="spacer"></div>
               <md-switch icons id="toggle-action_security_patch"></md-switch>
-              <md-ripple></md-ripple>
-            </div>
-
-            <div class="list-item list-item--toggle" id="toggle-action_boot_hash-row">
-              <div class="li-icon"><md-icon aria-hidden="true">verified</md-icon></div>
-              <div class="list-item-content">
-                <div class="toggle-text" data-i18n="control_toggle_action_boot_hash">Set Verified Boot Hash</div>
-                <span class="supporting-text" data-i18n="control_toggle_action_boot_hash_desc">Read and write verified boot hash for attestation</span>
-              </div>
-              <div class="spacer"></div>
-              <md-switch icons id="toggle-action_boot_hash"></md-switch>
               <md-ripple></md-ripple>
             </div>
 

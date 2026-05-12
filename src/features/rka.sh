@@ -14,7 +14,7 @@ log "RKA" "Start"
 MOD="io.github.mhmrdd.libxposed.ps.passit"
 
 if ! pm path "$MOD" >/dev/null 2>&1; then
-  log "RKA" "Error: PassIt not installed"
+  log "RKA" "Error: Play Strong not installed"
   exit 1
 fi
 

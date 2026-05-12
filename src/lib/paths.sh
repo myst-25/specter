@@ -11,7 +11,6 @@ TEE_STATUS="$TRICKY_DIR/tee_status"
 
 # Other system paths
 SPECTER_DIR="/data/adb/Specter"
-BOOT_HASH_FILE="/data/adb/boot_hash"
 HMA_DIR="/data/user/0/org.frknkrc44.hma_oss/files"
 HMA_FILE="$HMA_DIR/config.json"
 IDFILE="/data/local/tmp/.rka_id"

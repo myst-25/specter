@@ -17,7 +17,6 @@ log "ACTION" "Running full integrity pipeline"
 _feature_enabled toggle_action_gms && sh "$MODDIR/features/kill_play_store.sh" 2>/dev/null || true
 _feature_enabled toggle_action_target && sh "$MODDIR/features/target.sh" 2>/dev/null || true
 _feature_enabled toggle_action_security_patch && sh "$MODDIR/features/security_patch.sh" 2>/dev/null || true
-_feature_enabled toggle_action_boot_hash && sh "$MODDIR/features/boot_hash.sh" 2>/dev/null || true
 sh "$MODDIR/features/keybox.sh" 2>/dev/null || true
 [ "$(cfg_get toggle_action_pif 0)" != "0" ] && sh "$MODDIR/features/pif.sh" 2>/dev/null || true
 
