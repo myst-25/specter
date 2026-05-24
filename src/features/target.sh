@@ -6,8 +6,6 @@ MODDIR=${0%/*}
 . "$MODDIR/../lib/package_list.sh"
 . "$MODDIR/../lib/config_env.sh"
 
-[ -f "/data/adb/Specter/target_applied" ] && { log "TARGET" "Interactive App Targeting used — skipping auto generation"; exit 0; }
-
 log "TARGET" "Start"
 
 [ -d "$TRICKY_DIR" ] || die "Tricky Store data directory not found"
@@ -134,6 +132,5 @@ mv -f "$_TMP_TARGET" "$TARGET_TXT"
 
 _count=$(wc -l < "$TARGET_TXT")
 log "TARGET" "Wrote $_count entries to target.txt"
-sh "$MODDIR/../refresh_desc.sh" >/dev/null 2>&1 || true
 log "TARGET" "Finish"
 exit 0

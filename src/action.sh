@@ -29,7 +29,8 @@ run_device_info "$MODDIR"
 
 # Refresh module description for manager apps
 [ -f "$MODDIR/module.prop.bak" ] && cp "$MODDIR/module.prop.bak" "$MODDIR/module.prop"
-. "$MODDIR/lib/boot_core.sh"
+. "$MODDIR/lib/desc.sh"
+refresh_module_description
 
 log "ACTION" "Full integrity pipeline completed"
 

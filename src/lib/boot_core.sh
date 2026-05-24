@@ -17,7 +17,7 @@ if [ "$(toybox cat /sys/fs/selinux/enforce 2>/dev/null)" = "0" ]; then
 fi
 
 # Boot-time features — single authoritative list, all dispatched as scripts
-for _bf in recovery boot_hardening suspicious_props lsposed; do
+for _bf in recovery boot_hardening suspicious_props lsposed security_patch; do
   case "$_bf" in *[!a-zA-Z0-9_-]*) log "BOOT" "Skipping invalid feature: $_bf"; continue ;; esac
   _feature_should_run "$_bf" || continue
   sh "$MODDIR/features/$_bf.sh" >/dev/null 2>&1 || true
@@ -36,8 +36,8 @@ if [ -f "$SPECTER_DIR/rom_spoof_reported" ]; then
   rm -f "$SPECTER_DIR/rom_spoof_reported"
 fi
 
-# Generate fresh keybox info for description
-sh "$MODDIR/features/keybox_info.sh" >/dev/null 2>&1 || true
+# Generate fresh keybox info for description (backgrounded — no blocking)
+sh "$MODDIR/features/keybox_info.sh" >/dev/null 2>&1 &
 
 . "$MODDIR/lib/desc.sh"
 refresh_module_description

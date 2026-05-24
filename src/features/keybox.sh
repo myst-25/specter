@@ -205,16 +205,12 @@ if _is_teesimulator; then
     _install_teesimulator
     _clear_keybox_id
     cp "$DECODE_FILE" "$TARGET_FILE" 2>/dev/null || true
-    sh "$MODDIR/keybox_info.sh" >/dev/null 2>&1 || true
-    sh "$MODDIR/../refresh_desc.sh" >/dev/null 2>&1 || true
     log "KEYBOX" "Finish"
     exit 0
 fi
 
 mv "$DECODE_FILE" "$TARGET_FILE" || die "Failed to move decoded keybox to $TARGET_FILE"
 _clear_keybox_id
-sh "$MODDIR/keybox_info.sh" >/dev/null 2>&1 || true
-sh "$MODDIR/../refresh_desc.sh" >/dev/null 2>&1 || true
 log "KEYBOX" "Keybox installed successfully"
 log "KEYBOX" "Finish"
 exit 0

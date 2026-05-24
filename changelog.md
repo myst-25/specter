@@ -1,3 +1,26 @@
+# v1.4.2
+
+## Performance
+- Config writes batched: 200ms debounce + single shell exec per batch
+- Network check 3× faster: 1 DNS + 1 HTTP (7s max) vs 6 retries (21s)
+- One-pass keybox_info.json read in desc.sh; skip refresh if description unchanged
+- TEE readiness: retry loop (5× 500ms) instead of fixed sleep
+- Action pipeline sources desc.sh directly instead of full boot_core.sh
+- Target merge uses single `pm list packages` instead of two
+
+## HMA Config
+- Fixed silent empty download: `printf` chokes on 521KB variable in busybox ash — pass target file directly to `download()` instead
+- `download()` hardened: User-Agent header, non-empty output validation, reliable temp cleanup
+
+## Boot & Description
+- `keybox_info.sh` backgrounded at boot (non-blocking); network guard restored (no 30s hang)
+- Redundant `refresh_desc.sh` calls pruned from 4 feature scripts
+- `refreshKeyboxStatus(exec)` param to skip shell re-exec when data is fresh
+- `security_patch.sh` runs at boot so description shows patch date without WebUI
+
+## Other
+- `target_applied` marker removed — obsolete since `target_merge.sh` handles updates intelligently
+
 # v1.4.1
 
 ## Control System Fixes

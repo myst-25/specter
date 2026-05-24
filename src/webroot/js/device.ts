@@ -50,14 +50,16 @@ export async function refreshDevice(): Promise<InfoJson | null> {
   return data;
 }
 
-export async function refreshKeyboxStatus(): Promise<KeyboxInfoJson | null> {
-  try {
-    const result = await runScript('keybox_info.sh', 'feature');
-    if (result.output) {
-      result.output.split('\n').filter(Boolean).forEach(l => appendToOutput(`[keybox] ${l}`));
+export async function refreshKeyboxStatus(exec = true): Promise<KeyboxInfoJson | null> {
+  if (exec) {
+    try {
+      const result = await runScript('keybox_info.sh', 'feature');
+      if (result.output) {
+        result.output.split('\n').filter(Boolean).forEach(l => appendToOutput(`[keybox] ${l}`));
+      }
+    } catch (e) {
+      console.warn('Keybox info script failed:', e);
     }
-  } catch (e) {
-    console.warn('Keybox info script failed:', e);
   }
   const data = await fetchJson<KeyboxInfoJson>(API_URLS.KEYBOX_INFO);
   if (data) applyKeyboxStatus(data);

@@ -117,12 +117,10 @@ for entry in $FIXED_TARGETS; do
   _append_missing "$entry"
 done
 
-for flag in "-3" "-s"; do
-  pkgs=$(pm list packages "$flag" 2>/dev/null) || {
-    log "TARGET" "Warning: Failed to list packages (flag $flag)"
-    continue
-  }
-  [ -z "$pkgs" ] && continue
+pkgs=$(pm list packages 2>/dev/null) || {
+  log "TARGET" "Warning: Failed to list packages"
+}
+if [ -n "$pkgs" ]; then
   echo "$pkgs" | cut -d ":" -f 2 > "$TEMP_PKGS"
   if [ -f "$SPECTER_DIR/blacklist_enabled" ] && [ -s "$BLACKLIST" ]; then
     if grep -Fvxf "$BLACKLIST" "$TEMP_PKGS" > "${TEMP_PKGS}.filtered" 2>/dev/null; then
@@ -163,13 +161,12 @@ for flag in "-3" "-s"; do
     _append_missing "${pkg}${_suffix}"
   done < "$TEMP_PKGS"
   rm -f "$TEMP_PKGS" "${TEMP_PKGS}.filtered"
-done
+fi
 
 rm -f "${TARGET_TXT}.bak"
 [ -f "$TARGET_TXT" ] && cp "$TARGET_TXT" "${TARGET_TXT}.bak"
 mv -f "$_TMP_TARGET" "$TARGET_TXT"
 
 log "TARGET" "Checked $_count entries, added $_added"
-sh "$MODDIR/../refresh_desc.sh" >/dev/null 2>&1 || true
 log "TARGET" "Finish (merge)"
 exit 0

@@ -87,7 +87,9 @@ export function wireKeyboxInstallButton() {
       } else {
         await runSimpleAction('keybox.sh', btn, spinner);
       }
-      await refreshKeyboxStatus();
+      const moddir = getModuleDir();
+      if (moddir) await exec(`sh ${shellEscape(moddir + '/refresh_desc.sh')}`);
+      await refreshKeyboxStatus(false);
     } catch (_e) {
       console.warn('Install error:', _e);
     } finally {
@@ -220,7 +222,8 @@ export async function openCustomKeyboxDialog() {
     const result: any = await exec(`sh ${shellEscape(moddir + '/features/keybox.sh')}`);
     if (result.code === 0) {
       showToast(t('custom_kb_installed', 'Custom keybox installed'), { icon: 'check_circle', type: 'success' as any, autoCloseDelay: 3000 });
-      refreshKeyboxStatus();
+      await exec(`sh ${shellEscape(moddir + '/refresh_desc.sh')}`);
+      refreshKeyboxStatus(false);
     } else {
       showToast(t('custom_kb_install_failed', 'Install failed'), { icon: 'error', type: 'error' as any, autoCloseDelay: 5000 });
     }

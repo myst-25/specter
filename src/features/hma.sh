@@ -35,15 +35,15 @@ log "HMA" "Found $_found"
 
 if check_network; then
   ensure_dir "$_target_dir"
-  _downloaded=$(download "$HMA_CONFIG_URL" 2>/dev/null)
-  if [ -n "$_downloaded" ]; then
-    printf '%s' "$_downloaded" > "$_target_file" 2>/dev/null && log "HMA" "Config downloaded and written to $_found"
+  if download "$HMA_CONFIG_URL" "$_target_file" 2>/dev/null; then
     chmod 600 "$_target_file" 2>/dev/null
     _uid=$(stat -c "%u" "$_target_dir" 2>/dev/null) || _uid=0
     chown "$_uid:$_uid" "$_target_file" 2>/dev/null
+    log "HMA" "Config downloaded and written to $_found"
     _injected=true
+  else
+    log "HMA" "Download returned empty"
   fi
-  [ "$_injected" != "true" ] && log "HMA" "Download failed, using built-in template"
 fi
 
 if [ "$_injected" != "true" ]; then
@@ -58,6 +58,6 @@ TEMPLATE
   log "HMA" "Built-in template written"
 fi
 
-unset _installed_pkgs _target_dir _target_file _found _injected _uid _downloaded
+unset _installed_pkgs _target_dir _target_file _found _injected _uid
 log "HMA" "Finish"
 exit 0

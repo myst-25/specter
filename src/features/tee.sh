@@ -14,12 +14,16 @@ log "TEE" "Start"
 [ ! -f "$APK" ] && { log "TEE" "APK not found: $APK"; exit 1; }
 
 pm install -r "$APK" 2>/dev/null || { log "TEE" "APK install failed"; exit 1; }
-sleep 1
 
-_tee=$(content query --uri content://$PACKAGE/check 2>/dev/null \
-  | grep -o 'status=[a-z]*' | cut -d= -f2) || true
+for _i in 1 2 3 4 5; do
+  _tee=$(content query --uri content://$PACKAGE/check 2>/dev/null \
+    | grep -o 'status=[a-z]*' | cut -d= -f2) || true
+  [ -n "$_tee" ] && break
+  sleep 0.5
+done
 _hash=$(content query --uri content://$PACKAGE/hash 2>/dev/null \
   | grep -oE '[a-f0-9]{64}|unavailable') || true
+unset _i
 
 pm uninstall $PACKAGE 2>/dev/null || true
 

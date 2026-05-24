@@ -47,8 +47,14 @@ if [ -f "$KEYBOX_FILE" ]; then
     fi
 
     # Check B: Catalog identity (source/version/text/up_to_date)
-    _history_json=$(download "$CATALOG_URL" 2>/dev/null)
-    log "KEYBOX_INFO" "History response length: ${#_history_json}"
+    _history_json=""
+    if check_network; then
+      CATALOG_TIMEOUT="${CATALOG_TIMEOUT:-15}"
+      _history_json=$(download "$CATALOG_URL" 2>/dev/null)
+      log "KEYBOX_INFO" "History response length: ${#_history_json}"
+    else
+      log "KEYBOX_INFO" "No network, skipping catalog"
+    fi
 
     if [ -n "$_history_json" ]; then
       _provider=$(cat "$CONFIG_DIR/kb_provider.val" 2>/dev/null || echo "auto")
