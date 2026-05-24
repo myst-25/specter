@@ -22,6 +22,15 @@ function flushNow() {
 }
 
 export async function cfgInit() {
+  try {
+    const lTheme = localStorage.getItem('themeMode');
+    if (lTheme) cache['theme'] = lTheme;
+    const lPreset = localStorage.getItem('themePreset');
+    if (lPreset) cache['theme_preset'] = lPreset;
+    const lLang = localStorage.getItem('selectedLanguage');
+    if (lLang) cache['lang'] = lLang;
+  } catch (e) {}
+
   if (!MODULE) return;
   const cfgDir = shellEscape(MODULE + '/config');
   const cmd = `for f in ${cfgDir}/*.val; do [ -f "\$f" ] || continue; k="\${f##*/}"; k="\${k%.val}"; v="\$(cat "\$f")"; [ -n "\$v" ] || continue; printf 'CFG:%s\n' "\$k"; printf '%s\n' "\$v"; done`;
@@ -62,6 +71,17 @@ export async function cfgGet(key: string, defaultValue?: string): Promise<string
 export function cfgSet(key: string, val: string | undefined | null) {
   cache[key] = val;
   pendingFlush.push({ key, val });
+
+  try {
+    if (key === 'theme') {
+      localStorage.setItem('themeMode', val || 'amoled');
+    } else if (key === 'theme_preset') {
+      localStorage.setItem('themePreset', val || 'monet');
+    } else if (key === 'lang') {
+      localStorage.setItem('selectedLanguage', val || 'auto');
+    }
+  } catch (e) {}
+
   if (flushTimer) clearTimeout(flushTimer);
   flushTimer = setTimeout(flushNow, 200);
 }

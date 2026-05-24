@@ -19,7 +19,7 @@ let currentMappedPreset: string = 'blue';
 
 export async function initTheme(savedMode: string) {
   currentPreset = await cfgGet('theme_preset', 'monet') || 'monet';
-  const mode = savedMode || 'dark';
+  const mode = savedMode || 'amoled';
 
   if (currentPreset === 'monet') {
     await applyMonetPreset(mode);
@@ -40,7 +40,7 @@ export async function initThemeUI() {
   }
 
   if (customElements.get('md-outlined-segmented-button')) {
-    const mode = await cfgGet('theme', 'dark') || 'dark';
+    const mode = await cfgGet('theme', 'amoled') || 'amoled';
     const group = document.getElementById('theme-mode-group');
     if (group) {
       group.querySelectorAll('md-outlined-segmented-button').forEach(btn => {
@@ -51,6 +51,7 @@ export async function initThemeUI() {
 }
 
 function resolveMode(mode: string): string {
+  if (mode === 'amoled') return 'dark';
   return mode === 'auto'
     ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
     : mode;
@@ -76,7 +77,6 @@ async function applyMonetPreset(mode: string) {
   document.documentElement.setAttribute('data-theme', mode);
   document.documentElement.setAttribute('data-theme-preset', 'monet');
   document.documentElement.setAttribute('data-theme-resolved', resolved);
-  cfgSet('theme_preset', 'monet');
   applyNamedPreset(currentMappedPreset, isDark);
 }
 
@@ -96,7 +96,7 @@ function applyPreset(preset: string) {
     document.querySelectorAll('.preset-chip').forEach(chip => {
       (chip as any).selected = (chip as HTMLElement).dataset.preset === 'monet';
     });
-    applyMonetPreset(document.documentElement.getAttribute('data-theme') || 'dark');
+    applyMonetPreset(document.documentElement.getAttribute('data-theme') || 'amoled');
     return;
   }
   currentPreset = preset;
@@ -165,7 +165,7 @@ function wireThemeControls() {
   modeGroup?.addEventListener('segmented-button-set-selection', (e: Event) => {
     const idx = (e as CustomEvent).detail.index;
     const btn = modeGroup!.querySelectorAll('md-outlined-segmented-button')[idx];
-    if (btn) applyMode(btn.getAttribute('value') || 'dark');
+    if (btn) applyMode(btn.getAttribute('value') || 'amoled');
   });
 
   document.querySelectorAll('.preset-chip').forEach(chip => {

@@ -1,0 +1,5 @@
+#!/bin/sh
+# Emulate zip command using PowerShell's Compress-Archive
+# Expected call: zip -r ../module.zip .
+
+powershell.exe -NoProfile -Command "Compress-Archive -Path * -DestinationPath ../module.zip -Force"

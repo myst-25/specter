@@ -188,6 +188,7 @@
   "terminal_clear": "Очистить",
   "theme_mode_auto": "Авто",
   "theme_mode_dark": "Тёмная",
+  "theme_mode_amoled": "AMOLED",
   "theme_mode_light": "Светлая",
   "theme_preset_monet": "Система",
   "tools_danger_zone": "Опасная зона",
@@ -208,5 +209,5 @@
   "control_toggle_prop_handler_desc": "Сбросить свойства состояния загрузки (vbmeta, verifiedboot, flash.locked) при загрузке",
   "sp_fetch": "Получить",
   "sp_fetching": "Получение последнего патча безопасности...",
-  "sp_fetched": "Последний патч безопасности получен",
+  "sp_fetched": "Последний патч безопасности получен"
 }

@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   /* Phase 1: Render frame */
   wireTopBarScroll();
-  const savedTheme = await cfgGet('theme', 'dark') || 'dark';
+  const savedTheme = await cfgGet('theme', 'amoled') || 'amoled';
   initTheme(savedTheme);
   wireNavigation();
   initRedirect();
@@ -98,9 +98,11 @@ function wireRefreshButton() {
   if (!btn) return;
   btn.addEventListener('click', async () => {
     btn.disabled = true;
-    await refreshDevice();
-    await refreshKeyboxStatus();
-    await refreshAppCatalog();
+    await Promise.all([
+      refreshDevice(),
+      refreshKeyboxStatus(),
+      refreshAppCatalog()
+    ]);
     btn.disabled = false;
   });
 }
