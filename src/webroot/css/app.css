@@ -100,17 +100,29 @@ section:not([hidden]) {
   margin-inline-end: 12px;
   font-size: 0.8125rem;
   font-weight: 500;
-  color: var(--md-sys-color-tertiary);
+  color: #2e7d32;
 }
 .network-chip md-icon {
   font-size: 20px;
-  color: var(--md-sys-color-tertiary);
+  color: #2e7d32;
+}
+[data-theme-resolved="dark"] .network-chip {
+  color: #81c784;
+}
+[data-theme-resolved="dark"] .network-chip md-icon {
+  color: #81c784;
 }
 .network-chip.offline {
-  color: var(--md-sys-color-error);
+  color: #d32f2f;
 }
 .network-chip.offline md-icon {
-  color: var(--md-sys-color-error);
+  color: #d32f2f;
+}
+[data-theme-resolved="dark"] .network-chip.offline {
+  color: #e57373;
+}
+[data-theme-resolved="dark"] .network-chip.offline md-icon {
+  color: #e57373;
 }
 
 .hero-card {
