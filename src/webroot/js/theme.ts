@@ -19,7 +19,7 @@ let currentMappedPreset: string = 'blue';
 
 export async function initTheme(savedMode: string) {
   currentPreset = await cfgGet('theme_preset', 'monet') || 'monet';
-  const mode = savedMode || 'amoled';
+  const mode = savedMode || 'auto';
 
   if (currentPreset === 'monet') {
     await applyMonetPreset(mode);
@@ -33,14 +33,12 @@ export async function initTheme(savedMode: string) {
 export async function initThemeUI() {
   const preset = currentPreset;
 
-  if (customElements.get('md-filter-chip')) {
-    document.querySelectorAll('.preset-chip').forEach(chip => {
-      (chip as any).selected = (chip as HTMLElement).dataset.preset === preset;
-    });
-  }
+  document.querySelectorAll('.preset-chip').forEach(chip => {
+    chip.classList.toggle('selected', (chip as HTMLElement).dataset.preset === preset);
+  });
 
   if (customElements.get('md-outlined-segmented-button')) {
-    const mode = await cfgGet('theme', 'amoled') || 'amoled';
+    const mode = await cfgGet('theme', 'auto') || 'auto';
     const group = document.getElementById('theme-mode-group');
     if (group) {
       group.querySelectorAll('md-outlined-segmented-button').forEach(btn => {
@@ -94,16 +92,16 @@ function applyMode(mode: string) {
 function applyPreset(preset: string) {
   if (preset === 'monet') {
     document.querySelectorAll('.preset-chip').forEach(chip => {
-      (chip as any).selected = (chip as HTMLElement).dataset.preset === 'monet';
+      chip.classList.toggle('selected', (chip as HTMLElement).dataset.preset === 'monet');
     });
-    applyMonetPreset(document.documentElement.getAttribute('data-theme') || 'amoled');
+    applyMonetPreset(document.documentElement.getAttribute('data-theme') || 'auto');
     return;
   }
   currentPreset = preset;
   document.documentElement.setAttribute('data-theme-preset', preset);
   cfgSet('theme_preset', preset);
   document.querySelectorAll('.preset-chip').forEach(chip => {
-    (chip as any).selected = (chip as HTMLElement).dataset.preset === preset;
+    chip.classList.toggle('selected', (chip as HTMLElement).dataset.preset === preset);
   });
   const isDark = document.documentElement.getAttribute('data-theme-resolved') === 'dark';
   applyNamedPreset(preset, isDark);
@@ -165,7 +163,7 @@ function wireThemeControls() {
   modeGroup?.addEventListener('segmented-button-set-selection', (e: Event) => {
     const idx = (e as CustomEvent).detail.index;
     const btn = modeGroup!.querySelectorAll('md-outlined-segmented-button')[idx];
-    if (btn) applyMode(btn.getAttribute('value') || 'amoled');
+    if (btn) applyMode(btn.getAttribute('value') || 'auto');
   });
 
   document.querySelectorAll('.preset-chip').forEach(chip => {

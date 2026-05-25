@@ -74,7 +74,7 @@ export function cfgSet(key: string, val: string | undefined | null) {
 
   try {
     if (key === 'theme') {
-      localStorage.setItem('themeMode', val || 'amoled');
+      localStorage.setItem('themeMode', val || 'auto');
     } else if (key === 'theme_preset') {
       localStorage.setItem('themePreset', val || 'monet');
     } else if (key === 'lang') {

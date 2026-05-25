@@ -56,7 +56,7 @@ function applyTranslations() {
     const val = currentStrings[key] || fallbackStrings[key];
     if (!val) return;
 
-    if (el.tagName === 'MD-NAVIGATION-TAB' || el.tagName === 'MD-ASSIST-CHIP' || el.tagName === 'MD-FILTER-CHIP') {
+    if (el.tagName === 'MD-NAVIGATION-TAB' || el.tagName === 'MD-ASSIST-CHIP') {
       (el as any).label = val;
       setAriaLabel(el, val);
       return;

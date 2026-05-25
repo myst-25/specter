@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   /* Phase 1: Render frame */
   wireTopBarScroll();
-  const savedTheme = await cfgGet('theme', 'amoled') || 'amoled';
+  const savedTheme = await cfgGet('theme', 'auto') || 'auto';
   initTheme(savedTheme);
   wireNavigation();
   initRedirect();
@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const savedDevMode = await cfgGet('dev_mode', 'false') || 'false';
   setDevMode(savedDevMode === 'true');
   const sw = document.getElementById('dev-mode-switch') as MdSwitch | null;
-  if (sw) sw.selected = savedDevMode === 'true';
+  if (sw) sw.toggleAttribute('selected', savedDevMode === 'true');
 
   document.addEventListener('languageChanged', () => {
     const active = document.querySelector('.nav-tab--active') as HTMLElement | null;

@@ -10,7 +10,7 @@ export function wireControlToggles() {
   for (const { id, key, default: def } of CONTROL_TOGGLES) {
     const sw = document.getElementById(id) as MdSwitch | null;
     if (!sw) continue;
-    cfgGet(key, def || '1').then(val => { sw.selected = val !== '0'; });
+    cfgGet(key, def || '1').then(val => { sw.toggleAttribute('selected', val !== '0'); });
     sw.addEventListener('change', () => {
       cfgSet(key, sw.selected ? '1' : '0');
     });
@@ -23,7 +23,7 @@ export async function refreshControlToggles() {
     const sw = document.getElementById(id) as MdSwitch | null;
     if (!sw) continue;
     const val = await cfgGet(key, def || '1');
-    sw.selected = val !== '0';
+    sw.toggleAttribute('selected', val !== '0');
   }
 }
 

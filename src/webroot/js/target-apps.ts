@@ -203,8 +203,12 @@ export async function openTargetAppsManager() {
   const titleEl = overlay.querySelector('.ta-title') as HTMLElement;
   const targetMap = new Map<string, AppState>();
   let blPkgs = new Set<string>();
+  let overlayClosed = false;
 
   function closeOverlay() {
+    if (overlayClosed) return;
+    overlayClosed = true;
+    window.removeEventListener('popstate', onPopState);
     overlay.classList.remove('ta-overlay--open');
     document.documentElement.style.overflow = '';
     setTimeout(() => {
@@ -212,7 +216,9 @@ export async function openTargetAppsManager() {
     }, 300);
   }
 
-  overlay.querySelector('#ta-back')!.addEventListener('click', closeOverlay);
+  overlay.querySelector('#ta-back')!.addEventListener('click', () => {
+    history.back();
+  });
 
   overlay.querySelector('#ta-menu-btn')!.addEventListener('click', () => {
     const menu = overlay.querySelector('#ta-menu') as MdMenu;
@@ -561,10 +567,16 @@ export async function openTargetAppsManager() {
   });
 
   overlay.addEventListener('click', (e) => {
-    if (e.target === overlay) closeOverlay();
+    if (e.target === overlay) history.back();
   });
 
-  window.addEventListener('popstate', closeOverlay);
+  history.pushState({ overlay: 'target-apps' }, '');
+
+  function onPopState() {
+    closeOverlay();
+  }
+
+  window.addEventListener('popstate', onPopState);
 
   await loadData();
 }

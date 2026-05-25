@@ -20,11 +20,11 @@
 
   <script>
     (function () {
-      var mode = localStorage.getItem('themeMode') || 'amoled';
+      var mode = localStorage.getItem('themeMode') || 'auto';
       var preset = localStorage.getItem('themePreset') || 'monet';
       var resolved = mode === 'auto'
         ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-        : mode;
+        : (mode === 'amoled' ? 'dark' : mode);
       document.documentElement.setAttribute('data-theme', mode);
       document.documentElement.setAttribute('data-theme-preset', preset);
       document.documentElement.setAttribute('data-theme-resolved', resolved);
@@ -554,36 +554,36 @@
 
             <p class="md-typescale-label-large settings-sublabel" data-i18n="settings_color_preset">Color</p>
             <div id="preset-chips" class="preset-chips">
-              <md-filter-chip id="preset-blue" label="Blue" data-preset="blue" class="preset-chip" data-i18n="theme_preset_blue" aria-label="Blue" data-i18n-aria="theme_preset_blue">
-                <span slot="icon" class="preset-dot" style="background:#1157CE"></span>
-              </md-filter-chip>
-              <md-filter-chip id="preset-yellow" label="Yellow" data-preset="yellow" class="preset-chip" data-i18n="theme_preset_yellow" aria-label="Yellow" data-i18n-aria="theme_preset_yellow">
-                <span slot="icon" class="preset-dot" style="background:#8F4E06"></span>
-              </md-filter-chip>
-              <md-filter-chip id="preset-red" label="Red" data-preset="red" class="preset-chip" data-i18n="theme_preset_red" aria-label="Red" data-i18n-aria="theme_preset_red">
-                <span slot="icon" class="preset-dot" style="background:#B3251E"></span>
-              </md-filter-chip>
-              <md-filter-chip id="preset-purple" label="Purple" data-preset="purple" class="preset-chip" data-i18n="theme_preset_purple" aria-label="Purple" data-i18n-aria="theme_preset_purple">
-                <span slot="icon" class="preset-dot" style="background:#7438D2"></span>
-              </md-filter-chip>
-              <md-filter-chip id="preset-green" label="Green" data-preset="green" class="preset-chip" data-i18n="theme_preset_green" aria-label="Green" data-i18n-aria="theme_preset_green">
-                <span slot="icon" class="preset-dot" style="background:#006C35"></span>
-              </md-filter-chip>
-              <md-filter-chip id="preset-orange" label="Orange" data-preset="orange" class="preset-chip" data-i18n="theme_preset_orange" aria-label="Orange" data-i18n-aria="theme_preset_orange">
-                <span slot="icon" class="preset-dot" style="background:#9A4600"></span>
-              </md-filter-chip>
-              <md-filter-chip id="preset-pink" label="Pink" data-preset="pink" class="preset-chip" data-i18n="theme_preset_pink" aria-label="Pink" data-i18n-aria="theme_preset_pink">
-                <span slot="icon" class="preset-dot" style="background:#B60D6E"></span>
-              </md-filter-chip>
-              <md-filter-chip id="preset-cyan" label="Cyan" data-preset="cyan" class="preset-chip" data-i18n="theme_preset_cyan" aria-label="Cyan" data-i18n-aria="theme_preset_cyan">
-                <span slot="icon" class="preset-dot" style="background:#00687C"></span>
-              </md-filter-chip>
-              <md-filter-chip id="preset-grey" label="Grey" data-preset="grey" class="preset-chip" data-i18n="theme_preset_grey" aria-label="Grey" data-i18n-aria="theme_preset_grey">
-                <span slot="icon" class="preset-dot" style="background:#5E5E5E"></span>
-              </md-filter-chip>
-              <md-filter-chip id="preset-monet" label="System" data-preset="monet" class="preset-chip" data-i18n="theme_preset_monet" aria-label="System" data-i18n-aria="theme_preset_monet" selected>
-                <span slot="icon" class="preset-dot" style="background:linear-gradient(135deg,#1157CE 11%,#8F4E06 22%,#B3251E 33%,#7438D2 44%,#006C35 55%,#9A4600 66%,#B60D6E 77%,#00687C 88%,#5E5E5E)"></span>
-              </md-filter-chip>
+              <button id="preset-blue" data-preset="blue" class="preset-chip" aria-label="Blue" data-i18n-aria="theme_preset_blue" style="background:#1157CE">
+                <md-icon class="check-icon">check</md-icon>
+              </button>
+              <button id="preset-yellow" data-preset="yellow" class="preset-chip" aria-label="Yellow" data-i18n-aria="theme_preset_yellow" style="background:#8F4E06">
+                <md-icon class="check-icon">check</md-icon>
+              </button>
+              <button id="preset-red" data-preset="red" class="preset-chip" aria-label="Red" data-i18n-aria="theme_preset_red" style="background:#B3251E">
+                <md-icon class="check-icon">check</md-icon>
+              </button>
+              <button id="preset-purple" data-preset="purple" class="preset-chip" aria-label="Purple" data-i18n-aria="theme_preset_purple" style="background:#7438D2">
+                <md-icon class="check-icon">check</md-icon>
+              </button>
+              <button id="preset-green" data-preset="green" class="preset-chip" aria-label="Green" data-i18n-aria="theme_preset_green" style="background:#006C35">
+                <md-icon class="check-icon">check</md-icon>
+              </button>
+              <button id="preset-orange" data-preset="orange" class="preset-chip" aria-label="Orange" data-i18n-aria="theme_preset_orange" style="background:#9A4600">
+                <md-icon class="check-icon">check</md-icon>
+              </button>
+              <button id="preset-pink" data-preset="pink" class="preset-chip" aria-label="Pink" data-i18n-aria="theme_preset_pink" style="background:#B60D6E">
+                <md-icon class="check-icon">check</md-icon>
+              </button>
+              <button id="preset-cyan" data-preset="cyan" class="preset-chip" aria-label="Cyan" data-i18n-aria="theme_preset_cyan" style="background:#00687C">
+                <md-icon class="check-icon">check</md-icon>
+              </button>
+              <button id="preset-grey" data-preset="grey" class="preset-chip" aria-label="Grey" data-i18n-aria="theme_preset_grey" style="background:#5E5E5E">
+                <md-icon class="check-icon">check</md-icon>
+              </button>
+              <button id="preset-monet" data-preset="monet" class="preset-chip selected" aria-label="System" data-i18n-aria="theme_preset_monet" style="background:linear-gradient(135deg,#1157CE 11%,#8F4E06 22%,#B3251E 33%,#7438D2 44%,#006C35 55%,#9A4600 66%,#B60D6E 77%,#00687C 88%,#5E5E5E)">
+                <md-icon class="check-icon">check</md-icon>
+              </button>
             </div>
 
           </md-outlined-card>
