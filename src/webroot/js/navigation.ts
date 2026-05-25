@@ -61,6 +61,16 @@ export function wireNavigation() {
     reposition(tab);
     pages.forEach((el) => { el.hidden = el.id !== pageId; });
 
+    if (pageId === 'control-page') {
+      const { refreshControlToggles } = await import('./toggles.js');
+      await refreshControlToggles().catch(() => {});
+    } else if (pageId === 'settings-page') {
+      const { refreshDevMode } = await import('./toggles.js');
+      await refreshDevMode().catch(() => {});
+      const { initThemeUI } = await import('./theme.js');
+      await initThemeUI().catch(() => {});
+    }
+
     if (pageId !== 'home-page' && !exitStatePushed) {
       history.pushState(null, '');
       exitStatePushed = true;

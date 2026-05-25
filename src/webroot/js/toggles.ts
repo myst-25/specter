@@ -35,3 +35,10 @@ export function wireDevMode() {
     cfgSet('dev_mode', sw.selected ? 'true' : 'false');
   });
 }
+
+export async function refreshDevMode() {
+  const savedDevMode = await cfgGet('dev_mode', 'false') || 'false';
+  setDevMode(savedDevMode === 'true');
+  const sw = document.getElementById('dev-mode-switch') as MdSwitch | null;
+  if (sw) sw.toggleAttribute('selected', savedDevMode === 'true');
+}
