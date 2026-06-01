@@ -31,7 +31,11 @@ unset _i
 
 pm uninstall $PACKAGE 2>/dev/null || true
 
-_partition_hash=$(vbmeta_digest "/dev/block/by-name/vbmeta" || true)
+_tee_slot=$(getprop ro.boot.slot_suffix 2>/dev/null || echo "")
+_tee_vbmeta_dev="/dev/block/by-name/vbmeta${_tee_slot}"
+[ -b "$_tee_vbmeta_dev" ] || _tee_vbmeta_dev="/dev/block/by-name/vbmeta"
+_partition_hash=$(vbmeta_digest "$_tee_vbmeta_dev" || true)
+unset _tee_slot _tee_vbmeta_dev
 
 # --- Save to cache + set boot prop ---
 _publish_hash() {

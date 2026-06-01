@@ -8,7 +8,7 @@ MODDIR=${0%/*}
 . "$MODDIR/lib/paths.sh"
 . "$MODDIR/lib/package_list.sh"
 . "$MODDIR/lib/config_env.sh"
-detect_root_solution
+[ -z "$ROOT_SOL" ] && detect_root_solution
 export ROOT_SOL
 
 log "BOOT" "KSU/APatch detected, sourcing unified boot core"
