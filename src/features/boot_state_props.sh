@@ -1,6 +1,11 @@
 #!/system/bin/sh
-set -e
 MODDIR=${0%/*}
+
+if [ -z "$_NS_INIT" ] && [ -x /system/bin/nsenter ]; then
+  export _NS_INIT=1
+  exec /system/bin/nsenter -t 1 -m -- /system/bin/sh "$0" "$@"
+fi
+
 . "$MODDIR/../lib/common.sh"
 . "$MODDIR/../lib/paths.sh"
 . "$MODDIR/../lib/package_list.sh"

@@ -1,6 +1,12 @@
 #!/system/bin/sh
-set -e
 MODDIR=${0%/*}
+
+# Re-exec into init mount namespace to escape APatch/KSU ksu.exec sandbox
+if [ -z "$_NS_INIT" ] && [ -x /system/bin/nsenter ]; then
+  export _NS_INIT=1
+  exec /system/bin/nsenter -t 1 -m -- /system/bin/sh "$0" "$@"
+fi
+
 . "$MODDIR/../lib/common.sh"
 . "$MODDIR/../lib/config_env.sh"
 . "$MODDIR/../lib/paths.sh"
@@ -9,8 +15,6 @@ MODDIR=${0%/*}
 log "HMA" "Start"
 
 _installed_pkgs=$(pm list packages 2>/dev/null) || log "HMA" "Warning: Failed to list installed packages"
-
-_injected=false
 
 if echo "$_installed_pkgs" | grep -q "org.frknkrc44.hma_oss"; then
   _target_dir="$HMA_DIR"
@@ -35,29 +39,26 @@ log "HMA" "Found $_found"
 
 if check_network; then
   ensure_dir "$_target_dir"
-  if download "$HMA_CONFIG_URL" "$_target_file" 2>/dev/null; then
+  rm -f "$_target_file" 2>/dev/null
+  if [ -x /data/adb/ap/bin/busybox ] && /data/adb/ap/bin/busybox wget -T 10 --no-check-certificate -qO "$_target_file" -U "Specter/1.0" "$HMA_CONFIG_URL" 2>/dev/null && [ -s "$_target_file" ]; then
     chmod 600 "$_target_file" 2>/dev/null
-    _uid=$(stat -c "%u" "$_target_dir" 2>/dev/null) || _uid=0
+    _pkg=$(echo "$_target_dir" | cut -d"/" -f5)
+    _uid=$(pm list packages -U 2>/dev/null | grep "^package:$_pkg uid:" | sed "s/.*uid://") || _uid=0
     chown "$_uid:$_uid" "$_target_file" 2>/dev/null
+    chown "$_uid:$_uid" "$_target_dir" 2>/dev/null
     log "HMA" "Config downloaded and written to $_found"
-    _injected=true
+  elif download "$HMA_CONFIG_URL" "$_target_file" 2>/dev/null; then
+    chmod 600 "$_target_file" 2>/dev/null
+    _pkg=$(echo "$_target_dir" | cut -d"/" -f5)
+    _uid=$(pm list packages -U 2>/dev/null | grep "^package:$_pkg uid:" | sed "s/.*uid://") || _uid=0
+    chown "$_uid:$_uid" "$_target_file" 2>/dev/null
+    chown "$_uid:$_uid" "$_target_dir" 2>/dev/null
+    log "HMA" "Config downloaded and written to $_found"
   else
     log "HMA" "Download returned empty"
   fi
 fi
 
-if [ "$_injected" != "true" ]; then
-  log "HMA" "Writing built-in template"
-  ensure_dir "$_target_dir"
-  cat > "$_target_file" <<'TEMPLATE'
-{"configVersion":93,"detailLog":false,"errorOnlyLog":false,"maxLogSize":256,"forceMountData":true,"disableActivityLaunchProtection":false,"altAppDataIsolation":true,"altVoldAppDataIsolation":false,"skipSystemAppDataIsolation":true,"packageQueryWorkaround":false,"templates":{"HIDE MY CUSTOM APP":{"isWhitelist":false,"appList":["com.zhenxi.hunter","com.byxiaorun.detector","io.github.lsposed.disableflagsecure","io.github.vvb2060.mahoshojo","io.liankong.riskdetector","io.github.rabehx.securify","com.thend.integritychecker","bin.mt.plus.canary","com.android.nativetest","icu.nullptr.nativetest","com.coderstory.toolkit","com.sukisu.ultra","com.tencent.docs","me.garfieldhan.holmes","com.github.capntrips.kernelflasher","com.reveny.nativecheck","gr.nikolasspyr.integritycheck","io.github.chsbuffer.revancedxposed","com.my.televip","io.github.vvb2060.keyattestation","com.henrikherzig.playintegritychecker","krypton.tbsafetychecker","com.youhu.laifu","com.tsng.applistdetector","com.kikyps.crackme","com.jc","io.github.a13e300.ksuwebui","io.github.huskydg.memorydetector","com.godevelopers.OprekCek","id.my.pjm.qbcd_okr_dvii","luna.safe.luna","me.yuri.ok","icu.nullptr.nativetext","com.tsng.hidemyapplist","com.zrt.xposed","xzr.hkf","com.android.shell","com.dergoogler.mmrl","com.dergoogler.mmrl.wx","com.aurora.store.nightly","io.github.vvb2060.magisk","com.luckyzyx.luckytool","com.topjohnwu.magisk","com.anydesk.anydeskandroid","com.teamviewer.quicksupport.market","com.teamviewer.teamviewer.market.mobile","icu.nullptr.applistdetector","com.omarea.vtools","bin.mt.plus","me.weishu.kernelsu","gvbtcl.yubbjm.qajtjy","tsfvdj.xiwtkz.wuhyrv","com.android.kernel","com.rem01gaming.disclosure","eu.thedarken.sdm","eu.darken.sdmse","moe.shizuku.privileged.api","com.termux","com.thor.nonroot","top.ltfan.notdeveloper"]}},"scope":{"icu.nullptr.applistdetector":{"useWhitelist":false,"excludeSystemApps":false,"hideInstallationSource":false,"hideSystemInstallationSource":false,"excludeTargetInstallationSource":false,"invertActivityLaunchProtection":false,"excludeVoldIsolation":false,"restrictedZygotePermissions":[],"applyTemplates":["HIDE MY CUSTOM APP"],"applyPresets":["custom_rom","root_apps","sus_apps","xposed"],"applySettingTemplates":[],"applySettingsPresets":["accessibility","dev_options"],"extraAppList":[],"extraOppositeAppList":[]},"krypton.tbsafetychecker":{"useWhitelist":false,"excludeSystemApps":true,"hideInstallationSource":false,"hideSystemInstallationSource":false,"excludeTargetInstallationSource":false,"invertActivityLaunchProtection":false,"excludeVoldIsolation":false,"restrictedZygotePermissions":[],"applyTemplates":["HIDE MY CUSTOM APP"],"applyPresets":["custom_rom","detector_apps","root_apps","shizuku_dhizuku","sus_apps","xposed"],"applySettingTemplates":[],"applySettingsPresets":["accessibility","dev_options","input_method"],"extraAppList":["oj.jglv.wblgy.cwzh","org.frknkrc44.hma_oss","com.topmiaohan.superlist"],"extraOppositeAppList":[]}},"settingsTemplates":{}}
-TEMPLATE
-  chmod 600 "$_target_file" 2>/dev/null
-  _uid=$(stat -c "%u" "$_target_dir" 2>/dev/null) || _uid=0
-  chown "$_uid:$_uid" "$_target_file" 2>/dev/null
-  log "HMA" "Built-in template written"
-fi
-
-unset _installed_pkgs _target_dir _target_file _found _injected _uid
+unset _installed_pkgs _target_dir _target_file _found _uid _pkg
 log "HMA" "Finish"
 exit 0
