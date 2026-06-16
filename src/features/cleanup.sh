@@ -23,14 +23,6 @@ _rm() {
   rm -rf "$1" 2>/dev/null || log "CLEANUP" "Warning: Failed to remove $1"
 }
 
-log "CLEANUP" "Removing detector app data directories..."
-for _pkg in $DETECTOR_APPS; do
-  _rm "/storage/emulated/0/Android/data/$_pkg"
-  _rm "/storage/emulated/0/Android/obb/$_pkg"
-  _rm "/storage/emulated/0/Android/media/$_pkg"
-done
-log "CLEANUP" "Detector app directories cleaned"
-
 log "CLEANUP" "Removing detector log files..."
 _rm "/storage/emulated/0/meow_detector.log"
 _rm "/storage/emulated/0/keybox_status.json"

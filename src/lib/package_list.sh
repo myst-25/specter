@@ -2,39 +2,9 @@
 GMS_APPS="com.android.vending com.google.android.gsf com.google.android.gms com.google.android.contactkeys com.google.android.ims com.google.android.safetycore com.google.android.apps.walletnfcrel com.google.android.apps.nbu.paisa.user"
 FIXED_TARGETS="android $GMS_APPS"
 
-GMS_KILL_LIST="com.android.vending com.google.android.gms com.google.android.gms.persistent com.google.android.gms.unstable com.google.android.gsf com.google.android.ims com.google.android.contactkeys com.google.android.safetycore com.google.android.rkpdapp com.android.chrome com.google.android.googlequicksearchbox"
-
-REMOTE_CONTROL_APPS="com.anydesk.anydeskandroid com.teamviewer.teamviewer.market.mobile com.teamviewer.quicksupport.market com.sand.airdroid com.sand.airmirror com.koushikdutta.vysor com.genymobile.scrcpy com.microsoft.rdc.androidx com.realvnc.viewer.android com.splashtop.remote.pad.v2 com.dwservice.dwagent com.carriez.flutter_hbb com.carriez.flutter_hbbclient com.rustdesk.rustdesk"
+GMS_KILL_LIST="$GMS_APPS com.google.android.gms.persistent com.google.android.gms.unstable com.google.android.rkpdapp com.android.chrome com.google.android.googlequicksearchbox"
 
 TOOL_APPS="bin.mt.plus bin.mt.plus.canary com.omarea.vtools moe.shizuku.privileged.api com.estrongs.android.pop com.coolapk.market com.sevtinge.hyperceiler com.coderstory.toolkit"
-
-DETECTOR_APPS="
-com.scottyab.rootbeer
-com.topjohnwu.magisk
-com.kimjisub.launcher
-com.saurik.substrate
-com.formyhm.hideroot
-com.devadvance.rootcloak
-com.amphoras.hidelockscreen
-com.amphoras.hidethem
-com.ramcrowd.safetynet
-com.chelpus.safetynet
-com.arjan.safetynetfix
-com.scottyab.safetynet
-com.stupidstuff.safetynet
-com.genymotion.genymotion
-com.bluestacks
-com.andy.andy
-com.ami.duos
-com.vmos
-com.parallel.parallel
-io.va.exposed
-org.meowcat.virtualboot
-com.lody.virtual
-com.lbe.parallel
-"
-
-BLACKLIST_EXTRA="com.android.chrome com.google.android.apps.photos com.google.android.youtube com.topjohnwu.magisk mmrl"
 
 SUSPICIOUS_PROPS="\
 persist.hyperceiler.log.level|warning|HyperCeiler modding tool persistent log

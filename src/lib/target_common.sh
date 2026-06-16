@@ -37,13 +37,9 @@ _tee_section() {
 _ensure_blacklist() {
   BLACKLIST="$SPECTER_DIR/blacklist.txt"
   if [ ! -f "$BLACKLIST" ]; then
-    log "TARGET" "Creating default blacklist from DETECTOR_APPS"
+    log "TARGET" "Creating default blacklist"
     ensure_dir "$SPECTER_DIR"
-    {
-      for _pkg in $DETECTOR_APPS $BLACKLIST_EXTRA; do
-        echo "$_pkg"
-      done
-    } > "$BLACKLIST"
+    : > "$BLACKLIST"
     log "TARGET" "Default blacklist created"
   fi
   unset _pkg
