@@ -7,7 +7,7 @@ const t = (key: string, fallback: string): string => getTranslation(key) || fall
 export function openBootHardenDialog() {
   const dialog = document.createElement('md-dialog');
 
-  cfgGet('boot_hardening_selinux', '1').then(selinux => {
+  cfgGet('boot_hardening_proc', '1').then(selinux => {
     cfgGet('boot_hardening_bootmode', '1').then(bootmode => {
       dialog.innerHTML = `
         <div slot="headline">
@@ -22,8 +22,8 @@ export function openBootHardenDialog() {
             <div class="list-item list-item--toggle">
               <div class="li-icon"><md-icon aria-hidden="true">security</md-icon></div>
               <div class="list-item-content">
-                <div class="toggle-text">${t('boot_harden_selinux', 'SELinux & Proc Protection')}</div>
-                <span class="supporting-text">${t('boot_harden_selinux_desc', 'Protect SELinux enforce, /proc/cmdline, /proc/net/unix, install-recovery.sh')}</span>
+                <div class="toggle-text">${t('boot_harden_proc', 'Proc & File Protection')}</div>
+                <span class="supporting-text">${t('boot_harden_proc_desc', 'Protect /proc/cmdline, /proc/net/unix, install-recovery.sh')}</span>
               </div>
               <div class="spacer"></div>
               <md-switch icons id="bh-selinux" ${selinux === '1' ? 'selected' : ''}></md-switch>
@@ -59,7 +59,7 @@ export function openBootHardenDialog() {
         try {
           const s = dialog.querySelector('#bh-selinux') as MdSwitch;
           const b = dialog.querySelector('#bh-bootmode') as MdSwitch;
-          cfgSet('boot_hardening_selinux', s.selected ? '1' : '0');
+          cfgSet('boot_hardening_proc', s.selected ? '1' : '0');
           cfgSet('boot_hardening_bootmode', b.selected ? '1' : '0');
           showToast(t('toast_success', 'Done'), { icon: 'check_circle', type: 'success', autoCloseDelay: 2500 });
           dialog.close();

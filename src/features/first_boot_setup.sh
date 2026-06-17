@@ -31,12 +31,8 @@ if [ -f "$SECURITY_PATCH_FILE" ]; then
   log "FIRST_BOOT" "Backed up $SECURITY_PATCH_FILE"
 fi
 
-log "FIRST_BOOT" "Installing keybox"
-sh "$MODDIR/../features/keybox.sh" || log "FIRST_BOOT" "Keybox installation failed (exit $?)"
-
-
-log "FIRST_BOOT" "Refreshing keybox info cache"
-sh "$MODDIR/../features/keybox_info.sh" || log "FIRST_BOOT" "keybox_info.sh failed (exit $?)"
+log "FIRST_BOOT" "Running full integrity pipeline"
+sh "$MODDIR/../action.sh" || log "FIRST_BOOT" "action.sh failed (exit $?)"
 
 log "FIRST_BOOT" "Finish"
 exit 0

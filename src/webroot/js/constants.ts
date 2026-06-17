@@ -18,7 +18,7 @@ export interface ToggleDef {
   key: string;
   default?: string;
   icon: string;
-  section: 'boot' | 'action';
+  section: 'boot' | 'action' | 'background';
 }
 
 export const CONTROL_TOGGLES: ToggleDef[] = [
@@ -32,6 +32,8 @@ export const CONTROL_TOGGLES: ToggleDef[] = [
   { id: 'toggle-action_security_patch', key: 'toggle_action_security_patch', icon: 'security_update_good', section: 'action' },
   { id: 'toggle-action_pif', key: 'toggle_action_pif', icon: 'fingerprint', section: 'action' },
   { id: 'toggle-action_keybox', key: 'toggle_action_keybox', icon: 'vpn_key', section: 'action' },
+  { id: 'toggle-background_auto_target', key: 'toggle_auto_target', icon: 'my_location', section: 'background' },
+  { id: 'toggle-background_keybox_info', key: 'toggle_keybox_info', icon: 'refresh', section: 'background' },
 ];
 
 export const TRICKY_DIR = '/data/adb/tricky_store';

@@ -49,12 +49,6 @@ assert_prop_eq "boot: system.verified 0->1"            "partition.system.verifie
 assert_prop_eq "boot: vendor.verified 0->1"            "partition.vendor.verified" "1"
 
 
-# ---- apply_boot_hardening: no crash when selinux enforced ----
-bootstrap
-source_libs
-apply_boot_hardening
-ok "hardening: no crash when already enforcing"
-
 # ---- spoof_build_props: userdebug -> user (preserves prefix) ----
 bootstrap
 source_libs

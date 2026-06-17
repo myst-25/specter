@@ -14,11 +14,12 @@ function i18nLabelKey(key: string): string {
 
 export function renderControlToggles() {
   const boot = document.getElementById('control-boot-container');
+  const background = document.getElementById('control-background-container');
   const action = document.getElementById('control-action-container');
-  if (!boot || !action) return;
+  if (!boot || !background || !action) return;
 
   for (const toggle of CONTROL_TOGGLES) {
-    const container = toggle.section === 'boot' ? boot : action;
+    const container = toggle.section === 'boot' ? boot : toggle.section === 'background' ? background : action;
     const labelKey = i18nLabelKey(toggle.key);
     const descKey = labelKey + '_desc';
 

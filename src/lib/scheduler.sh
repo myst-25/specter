@@ -28,8 +28,8 @@ trap 'rm -f "$PID_FILE" "$INOTIFY_HANDLER" 2>/dev/null; exit' EXIT TERM INT HUP
 
 log "SCHED" "Started (PID $$)"
 
-# Launch inotifyd for app install detection if available
-if command -v inotifyd >/dev/null 2>&1 && [ "$(cfg_get toggle_auto_target 1)" = "1" ]; then
+# Launch inotifyd for app install detection if available (skip if method=polling)
+if command -v inotifyd >/dev/null 2>&1 && [ "$(cfg_get toggle_auto_target 1)" = "1" ] && [ "$(cfg_get auto_target_method instant)" != "polling" ]; then
   cat > "$INOTIFY_HANDLER" <<EOF
 #!/system/bin/sh
 sleep 3

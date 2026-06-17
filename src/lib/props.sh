@@ -41,13 +41,6 @@ sp_persist() {
   unset _sp_name _sp_value _sp_original
 }
 
-apply_boot_hardening() {
-  if [ "$(toybox cat /sys/fs/selinux/enforce 2>/dev/null)" = "0" ]; then
-    chmod 640 /sys/fs/selinux/enforce 2>/dev/null || true
-    chmod 440 /sys/fs/selinux/policy 2>/dev/null || true
-  fi
-}
-
 apply_vbmeta_props() {
   if [ -f "$VBMETA_DIGEST" ]; then
     resetprop -n ro.boot.vbmeta.digest "$(cat "$VBMETA_DIGEST")"
@@ -132,24 +125,6 @@ $(getprop 2>/dev/null | grep -E "pixelprops" | sed "s/^\[\(.*\)\]:.*/\1/" || tru
 BRS_PROPS
 
   unset _brs_gate _brs_prop _brs_val _brs_orig
-}
-
-disable_bootloader_spoofer() {
-  if command -v cmd >/dev/null 2>&1; then
-    if pm list packages 2>/dev/null | grep -q "es.chiteroman.bootloaderspoofer"; then
-      cmd package uninstall --user 0 "es.chiteroman.bootloaderspoofer" >/dev/null 2>&1 || true
-    fi
-    cmd appops set com.wmods.wppenhacer POST_NOTIFICATIONS deny 2>/dev/null || true
-  else
-    if grep -q "es.chiteroman.bootloaderspoofer" /data/system/packages.list 2>/dev/null; then
-      timeout 5 pm uninstall --user 0 "es.chiteroman.bootloaderspoofer" >/dev/null 2>&1 || true
-    fi
-    _wpp_xml="/data/data/com.wmods.wppenhacer/shared_prefs/com.wmods.wppenhacer_preferences.xml"
-    if [ -f "$_wpp_xml" ] && grep -q 'name="bootloader_spoofer" value="true"' "$_wpp_xml" 2>/dev/null; then
-      sed -i 's/\(name="bootloader_spoofer" value=\)"true"/\1"false"/' "$_wpp_xml" 2>/dev/null || true
-    fi
-    unset _wpp_xml
-  fi
 }
 
 detect_region() {

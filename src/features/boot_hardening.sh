@@ -6,13 +6,11 @@ MODDIR=${0%/*}
 
 log "BOOT_HARDEN" "Start"
 
-if [ "$(cfg_get boot_hardening_selinux 1)" != "0" ]; then
-  apply_boot_hardening
+if [ "$(cfg_get boot_hardening_proc 1)" != "0" ]; then
   chmod 440 /proc/cmdline 2>/dev/null || true
   chmod 440 /proc/net/unix 2>/dev/null || true
   find /vendor/bin /system/bin -name install-recovery.sh -exec chmod 440 {} + 2>/dev/null || true
-  chmod 750 /system/addon.d 2>/dev/null || true
-  log "BOOT_HARDEN" "SELinux hardening applied"
+  log "BOOT_HARDEN" "Proc hardening applied"
 fi
 
 if [ "$(cfg_get boot_hardening_bootmode 1)" != "0" ]; then

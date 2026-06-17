@@ -2298,6 +2298,57 @@ md-filled-tonal-button {
   --md-dialog-container-color: var(--md-sys-color-surface-container) !important;
 }
 
+.at-method-section {
+  margin-bottom: 4px;
+}
+
+.at-method-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface-variant);
+  margin-bottom: 10px;
+}
+
+.at-method-help {
+  font-size: 0.75rem;
+  color: var(--md-sys-color-on-surface-variant);
+  margin-top: 8px;
+  line-height: 1.4;
+}
+
+#at-interval-row {
+  transition: opacity 0.2s ease;
+}
+
+#at-interval-row.at-hidden {
+  display: none;
+}
+
+.at-interval-input {
+  width: 60px;
+  text-align: center;
+  padding: 18px 8px;
+  border-radius: 12px;
+  border: 1px solid var(--md-sys-color-outline);
+  background: transparent;
+  color: var(--md-sys-color-on-surface);
+  font-family: var(--md-ref-typeface-plain);
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.15s;
+  -moz-appearance: textfield;
+}
+
+.at-interval-input:focus {
+  border-color: var(--md-sys-color-primary);
+}
+
+.at-interval-input::-webkit-outer-spin-button,
+.at-interval-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 /* ===== Auto Targeting Dialog ===== */
 
 #auto-target-dialog [slot="headline"] {

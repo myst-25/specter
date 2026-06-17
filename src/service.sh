@@ -35,8 +35,6 @@ fi
 
 log "SERVICE" "Boot-time features done"
 
-disable_bootloader_spoofer 2>/dev/null || true
-
 [ -f "$SPECTER_DIR/tee_reported" ] && {
   sh "$MODDIR/features/tee.sh" >"$SPECTER_DIR/log/boot_tee.log" 2>&1
   [ -f "$TEE_STATUS" ] && rm -f "$SPECTER_DIR/tee_reported" || log "SERVICE" "TEE check failed, will retry on next boot"
