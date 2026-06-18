@@ -53,12 +53,9 @@ case "$_tee" in
 esac
 unset _tee
 
-# Download and install TEE check APK (done at install time while Binder is accessible)
-mkdir -p "$MODPATH/apk"
-curl -fsSL -o "$MODPATH/apk/specter.apk" "$TEE_CHECK_URL" 2>/dev/null || true
-if [ -f "$MODPATH/apk/specter.apk" ]; then
-  pm install -r "$MODPATH/apk/specter.apk" 2>/dev/null || true
-fi
+# Extract TEE check classes.dex from module zip
+mkdir -p "$MODPATH/deps"
+unzip -qqjo "$ZIPFILE" "deps/classes.dex" -d "$MODPATH/deps" 2>/dev/null || ui_print "- No deps/classes.dex in module"
 
 if [ "$_ts_found" = true ]; then
   ui_print ""

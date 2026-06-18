@@ -1,0 +1,215 @@
+package com.dpejoh.specter;
+
+import android.os.Looper;
+import android.security.keystore.KeyGenParameterSpec;
+import android.security.keystore.KeyProperties;
+import android.util.Log;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
+import java.security.KeyPairGenerator;
+import java.security.KeyStore;
+import java.security.SecureRandom;
+import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
+import java.security.spec.ECGenParameterSpec;
+
+public class Main {
+
+    private static final String TAG = "Specter";
+    private static final String ALIAS = "specter_tee_check";
+    private static final String ATTESTATION_OID = "1.3.6.1.4.1.11129.2.1.17";
+
+    public static void main(String[] args) {
+        String specterDir = "/data/adb/specter";
+        if (args.length > 0) specterDir = args[0];
+
+        prepareEnvironment();
+
+        boolean teeFunctional = checkTeeFunctional();
+        String hash = extractBootHash();
+
+        Log.i(TAG, "TEE status: " + (teeFunctional ? "normal" : "broken"));
+        if (hash != null) Log.i(TAG, "Boot hash: " + hash);
+
+        try {
+            new File(specterDir).mkdirs();
+            try (OutputStreamWriter w = new OutputStreamWriter(
+                    new FileOutputStream(new File(specterDir, "tee_status")), StandardCharsets.UTF_8)) {
+                w.write("tee_broken=" + !teeFunctional + "\n");
+            }
+            if (hash != null) {
+                try (OutputStreamWriter w = new OutputStreamWriter(
+                        new FileOutputStream(new File(specterDir, "tee_hash")), StandardCharsets.UTF_8)) {
+                    w.write(hash + "\n");
+                }
+                File vbmeta = new File(specterDir, "vbmeta_digest");
+                if (!vbmeta.exists()) {
+                    try (OutputStreamWriter w = new OutputStreamWriter(
+                            new FileOutputStream(vbmeta), StandardCharsets.UTF_8)) {
+                        w.write(hash + "\n");
+                    }
+                }
+            }
+            Log.i(TAG, "Results written to " + specterDir);
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to write status files", e);
+        }
+    }
+
+    private static boolean checkTeeFunctional() {
+        try {
+            KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
+            keyStore.load(null);
+            if (keyStore.containsAlias(ALIAS)) keyStore.deleteEntry(ALIAS);
+
+            KeyPairGenerator kpg = KeyPairGenerator.getInstance(
+                    KeyProperties.KEY_ALGORITHM_EC, "AndroidKeyStore");
+            byte[] challenge = new byte[16];
+            new SecureRandom().nextBytes(challenge);
+            kpg.initialize(new KeyGenParameterSpec.Builder(ALIAS, KeyProperties.PURPOSE_SIGN)
+                    .setAlgorithmParameterSpec(new ECGenParameterSpec("secp256r1"))
+                    .setDigests(KeyProperties.DIGEST_SHA256)
+                    .setAttestationChallenge(challenge)
+                    .build());
+            kpg.generateKeyPair();
+            return true;
+        } catch (Exception e) {
+            Log.w(TAG, "TEE check failed", e);
+            return false;
+        }
+    }
+
+    private static String extractBootHash() {
+        try {
+            KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
+            keyStore.load(null);
+            Certificate[] chain = keyStore.getCertificateChain(ALIAS);
+            keyStore.deleteEntry(ALIAS);
+            if (chain == null || chain.length == 0) return null;
+            byte[] ext = ((X509Certificate) chain[0]).getExtensionValue(ATTESTATION_OID);
+            if (ext == null) return null;
+            return parseBootHash(ext);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private static String parseBootHash(byte[] ext) {
+        try {
+            DerReader r = new DerReader(ext);
+            r = new DerReader(r.read().value);
+            DerReader fields = new DerReader(r.read().value);
+            int fieldCount = 0;
+            while (true) {
+                DerTlv f = fields.read();
+                if (f == null) break;
+                if (fieldCount == 7) {
+                    DerReader teeFields = new DerReader(f.value);
+                    while (true) {
+                        DerTlv t = teeFields.read();
+                        if (t == null) break;
+                        if (t.tag == 704) {
+                            DerReader inner = new DerReader(t.value);
+                            DerTlv rotSeq = inner.read();
+                            DerReader rotFields = new DerReader(rotSeq.value);
+                            int rotCount = 0;
+                            while (true) {
+                                DerTlv rf = rotFields.read();
+                                if (rf == null) break;
+                                if (rotCount == 3) return bytesToHex(rf.value);
+                                rotCount++;
+                            }
+                        }
+                    }
+                }
+                fieldCount++;
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to parse boot hash", e);
+        }
+        return null;
+    }
+
+    private static String bytesToHex(byte[] bytes) {
+        StringBuilder sb = new StringBuilder(bytes.length * 2);
+        for (byte b : bytes)
+            sb.append("0123456789abcdef".charAt((b >> 4) & 0xf))
+              .append("0123456789abcdef".charAt(b & 0xf));
+        return sb.toString();
+    }
+
+    private static class DerTlv {
+        final int tag;
+        final byte[] value;
+        DerTlv(int tag, byte[] value) { this.tag = tag; this.value = value; }
+    }
+
+    private static class DerReader {
+        private final byte[] data;
+        private int pos;
+
+        DerReader(byte[] data) { this.data = data; }
+
+        DerTlv read() {
+            if (pos >= data.length) return null;
+            int start = pos;
+            int tag = data[pos++] & 0xFF;
+            int tagNum = tag & 0x1F;
+            if (tagNum == 0x1F) tagNum = readTagNumber();
+            int len = readLength();
+            if (len < 0 || pos + len > data.length) return null;
+            byte[] val = new byte[len];
+            System.arraycopy(data, pos, val, 0, len);
+            pos += len;
+            return new DerTlv(tagNum, val);
+        }
+
+        private int readTagNumber() {
+            int num = 0;
+            while (pos < data.length) {
+                int b = data[pos++] & 0xFF;
+                num = (num << 7) | (b & 0x7F);
+                if ((b & 0x80) == 0) break;
+            }
+            return num;
+        }
+
+        private int readLength() {
+            if (pos >= data.length) return -1;
+            int b = data[pos++] & 0xFF;
+            if (b < 0x80) return b;
+            int numBytes = b & 0x7F;
+            if (numBytes == 0 || pos + numBytes > data.length) return -1;
+            int len = 0;
+            for (int i = 0; i < numBytes; i++)
+                len = (len << 8) | (data[pos++] & 0xFF);
+            return len;
+        }
+    }
+
+    private static void prepareEnvironment() {
+        try {
+            if (Looper.getMainLooper() == null) Looper.prepareMainLooper();
+            Class<?> atClass = Class.forName("android.app.ActivityThread");
+            Object at = atClass.getMethod("systemMain").invoke(null);
+            Object ctx = atClass.getMethod("getSystemContext").invoke(at);
+            Object app = Class.forName("android.app.Application").getDeclaredConstructor().newInstance();
+            Method attach = Class.forName("android.content.ContextWrapper")
+                    .getDeclaredMethod("attachBaseContext", Class.forName("android.content.Context"));
+            attach.setAccessible(true);
+            attach.invoke(app, ctx);
+            Field f = atClass.getDeclaredField("mInitialApplication");
+            f.setAccessible(true);
+            f.set(at, app);
+            Class.forName("android.security.keystore2.AndroidKeyStoreProvider")
+                    .getMethod("install").invoke(null);
+        } catch (Exception e) {
+            Log.w(TAG, "Environment setup failed", e);
+        }
+    }
+}

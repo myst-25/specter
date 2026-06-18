@@ -1,2 +1,2 @@
--keep class com.dpejoh.specter.** { *; }
+-keep class com.dpejoh.specter.Main { public static void main(java.lang.String[]); }
 -dontwarn org.bouncycastle.**
