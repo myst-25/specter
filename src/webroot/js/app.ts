@@ -73,6 +73,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   import('./gms-ui.js').then(m => m.wireGms()).catch(() => {});
   import('./security-patch-ui.js').then(m => m.wireSecurityPatch()).catch(() => {});
   import('./boot-hash-ui.js').then(m => m.wireBootHash()).catch(() => {});
+  import('./tee-hash-ui.js').then(m => m.wireTeeHash()).catch(() => {});
   import('./font.js').then(m => m.wireFontToggles()).catch(() => {});
 
   const savedDevMode = await cfgGet('dev_mode', 'false') || 'false';

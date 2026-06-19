@@ -2469,3 +2469,59 @@ md-filled-tonal-button {
 @keyframes sp-icn-pulse {
   to { transform: rotate(360deg); }
 }
+
+.tee-hash-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 0;
+}
+.tee-hash-label {
+  font-size: 0.875rem;
+  color: var(--md-sys-color-on-surface-variant);
+  flex-shrink: 0;
+  min-width: 80px;
+}
+.tee-hash-value {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tee-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px 4px 8px;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+.tee-status-badge md-icon {
+  font-size: 18px;
+}
+.tee-status--normal {
+  background: color-mix(in srgb, var(--md-sys-color-primary) 18%, transparent);
+  color: var(--md-sys-color-primary);
+}
+.tee-status--broken {
+  background: color-mix(in srgb, var(--md-sys-color-error) 18%, transparent);
+  color: var(--md-sys-color-error);
+}
+.tee-status--unknown {
+  background: color-mix(in srgb, var(--md-sys-color-on-surface-variant) 18%, transparent);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.boot-hash-text {
+  font-family: var(--sp-font-mono, 'JetBrains Mono Variable', 'JetBrains Mono', 'Cascadia Code', 'Fira Code', 'SF Mono', ui-monospace, monospace);
+  font-size: 0.8125rem;
+  color: var(--md-sys-color-on-surface);
+  word-break: break-all;
+  user-select: all;
+  -webkit-user-select: all;
+  background: var(--md-sys-color-surface-container-highest);
+  padding: 6px 10px;
+  border-radius: 8px;
+  line-height: 1.4;
+}

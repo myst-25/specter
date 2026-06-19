@@ -283,5 +283,15 @@
   "boot_hash_save_error": "Failed to save",
   "boot_hash_cleared": "Custom boot hash cleared",
   "restore_backups_title": "Restore Original Backups",
-  "restore_backups_desc": "Restores your original Tricky Store files from the first-boot backup"
+  "restore_backups_desc": "Restores your original Tricky Store files from the first-boot backup",
+  "check_tee_hash": "TEE & Boot Hash",
+  "check_tee_hash_desc": "Run TEE check and extract boot hash from scratch",
+  "tee_status_label": "TEE Status",
+  "tee_status_normal": "Normal",
+  "tee_status_broken": "Broken",
+  "tee_status_unknown": "Unknown",
+  "tee_status_error": "Error",
+  "boot_hash_unavailable": "Not available",
+  "cache_update": "Update cache",
+  "cache_updated": "Cache updated"
 }
