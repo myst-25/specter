@@ -1,18 +1,25 @@
-import { exec, getModuleDir } from './bridge.js';
+import { exec, getModuleDir, getDataDir } from './bridge.js';
 import { getTranslation } from './i18n.js';
 import { showToast } from './toast.js';
 import { shellEscape } from './utils.js';
 
 const t = (key: string, fallback: string): string => getTranslation(key) || fallback;
 
+function configDir(): string {
+  const data = getDataDir();
+  return data ? data + '/config' : '';
+}
+
 export function wireBootHash() {
   const btn = document.getElementById('boot-hash-btn');
   if (!btn) return;
   btn.addEventListener('click', async () => {
     const moddir = getModuleDir();
-    if (!moddir) return;
+    const cdir = configDir();
+    if (!moddir || !cdir) return;
 
-    const current = await exec(`cat ${shellEscape(moddir + '/config/custom_boot_hash.val')} 2>/dev/null || echo ""`);
+    const hashPath = shellEscape(cdir + '/custom_boot_hash.val');
+    const current = await exec(`cat ${hashPath} 2>/dev/null || echo ""`);
     const currentHash = (current.stdout || '').trim();
 
     const dialog = document.createElement('md-dialog');
@@ -38,7 +45,7 @@ export function wireBootHash() {
     dialog.querySelector('#boot-hash-cancel')!.addEventListener('click', () => dialog.close());
     dialog.querySelector('#boot-hash-clear')!.addEventListener('click', async () => {
       try {
-        await exec(`rm -f ${shellEscape(moddir + '/config/custom_boot_hash.val')}`);
+        await exec(`rm -f ${hashPath}`);
         await exec(`sh ${shellEscape(moddir + '/refresh_desc.sh')}`);
         showToast(t('boot_hash_cleared', 'Custom boot hash cleared'), { icon: 'check_circle', type: 'success', autoCloseDelay: 2500 });
         dialog.close();
@@ -55,9 +62,9 @@ export function wireBootHash() {
       }
       try {
         if (val) {
-          await exec(`mkdir -p ${shellEscape(moddir + '/config')} && printf '%s' ${shellEscape(val)} > ${shellEscape(moddir + '/config/custom_boot_hash.val')}`);
+          await exec(`mkdir -p ${shellEscape(cdir)} && printf '%s' ${shellEscape(val)} > ${hashPath}`);
         } else {
-          await exec(`rm -f ${shellEscape(moddir + '/config/custom_boot_hash.val')}`);
+          await exec(`rm -f ${hashPath}`);
         }
         await exec(`sh ${shellEscape(moddir + '/refresh_desc.sh')}`);
         showToast(t('boot_hash_saved', 'Custom boot hash saved'), { icon: 'check_circle', type: 'success', autoCloseDelay: 2500 });
