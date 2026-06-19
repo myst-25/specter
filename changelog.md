@@ -1,3 +1,22 @@
+# v1.4.4.10
+
+**New**
+- App icon resolution in target-apps overlay (lazy-loaded via IntersectionObserver, KernelSU native APIs, fallback SVG)
+- `app_info.sh` for native app label resolution from `dumpsys package`
+- `decode.sh` library extracted from `keybox.sh` (shared alphabet-substitution decoder)
+
+**Changed**
+- TEE attestation consolidated into single `runAttestationCheck()` with cleaner ASN.1 tag constants
+- App labels resolved via KernelSU `getPackagesInfo()` instead of remote catalog API
+- widevine.sh decodes shuffled-base64 attestation key before use
+- keybox.sh uses shared `decode_substitution()` from decode.sh
+- Vite build target set to `es2019`; zipUrl uses `latest/download` pattern
+- CSS `ta-list` padding reduced (20px → 15px)
+
+**Removed**
+- Remote app catalog API dependency (`rawbin.dpejoh.com/apps`)
+- Separate `checkTeeFunctional()` / `extractBootHash()` methods (merged)
+
 # v1.4.4.09
 
 **Breaking**
