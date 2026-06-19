@@ -105,7 +105,7 @@ function showResultDialog(
     </div>
     <md-divider class="settings-divider"></md-divider>
     <div class="tee-hash-row">
-      <span class="tee-hash-label">${t('boot_hash_label', 'Boot Hash')}</span>
+      <span class="tee-hash-label">${t('boot_hash', 'Boot Hash')}</span>
       <span class="tee-hash-value">
         <code class="boot-hash-text">${bootHash}</code>
         <md-icon-button id="tee-hash-copy" aria-label="${t('history_copy', 'Copy')}">

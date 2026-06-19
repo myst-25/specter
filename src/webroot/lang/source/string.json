@@ -291,6 +291,7 @@
   "tee_status_broken": "Broken",
   "tee_status_unknown": "Unknown",
   "tee_status_error": "Error",
+  "boot_hash": "Boot Hash",
   "boot_hash_unavailable": "Not available",
   "cache_update": "Update cache",
   "cache_updated": "Cache updated"
