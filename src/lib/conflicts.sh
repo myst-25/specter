@@ -83,10 +83,20 @@ _conflict_apply_scripts() {
   unset _cas_scripts _cas_choice _cas_old_ifs _cas_script
 }
 
+# Map a conflict feature name to its toggle config key.
+# action-pipeline features use the toggle_action_ prefix.
+_conflict_toggle_key() {
+  case "$1" in
+    target|security_patch) printf 'toggle_action_%s' "$1" ;;
+    *) printf 'toggle_%s' "$1" ;;
+  esac
+  unset _ctk_f
+}
+
 _feature_should_run() {
   _fsr_feature="$1" _fsr_default="${2:-1}"
-  [ "$(cfg_get "toggle_$_fsr_feature" "$_fsr_default")" != "0" ] || return 1
-  _conflict_claimed "$_fsr_feature" && return 1
+  _fsr_key="$(_conflict_toggle_key "$_fsr_feature")"
+  [ "$(cfg_get "$_fsr_key" "$_fsr_default")" != "0" ] || return 1
   return 0
 }
 
@@ -113,8 +123,19 @@ resolve_conflicts() {
         cfg_set "conflict_$_rc_id" "priority_specter"
         ;;
       passive)
-        cfg_set "conflict_$_rc_id" "priority_module"
-        log "CONFLICT" "$_rc_name: partial overlap, defaulting to Module priority"
+        if [ ! -f "$CONFIG_DIR/conflict_$_rc_id.val" ]; then
+          cfg_set "conflict_$_rc_id" "priority_module"
+          log "CONFLICT" "$_rc_name: partial overlap, defaulting to Module priority"
+        fi
+        # Sync claimed features to toggles (only set default, don't overwrite user)
+        _rc_old_ifs="$IFS"
+        IFS=','
+        for _rc_feature in $_rc_features; do
+          [ -z "$_rc_feature" ] && continue
+          _rc_toggle_key="$(_conflict_toggle_key "$_rc_feature")"
+          [ -f "$CONFIG_DIR/$_rc_toggle_key.val" ] || cfg_set "$_rc_toggle_key" "0"
+        done
+        IFS="$_rc_old_ifs"
         ;;
     esac
   done <<EOF
@@ -163,13 +184,14 @@ conflict_status_json() {
     _cs_priority=true
     [ "$_cs_choice" = "priority_module" ] && _cs_priority=false
     _cs_name_json="$(_escape_json "$_cs_name")"
+    _cs_features_json="$(_escape_json "$_cs_features")"
     if [ "$_cs_first" -eq 0 ]; then printf ','; else _cs_first=0; fi
-    printf '{"key":"%s","friendlyName":"%s","detected":true,"prioritySpecter":%s,"type":"%s"}' "$_cs_id" "$_cs_name_json" "$_cs_priority" "$_cs_type"
+    printf '{"key":"%s","friendlyName":"%s","detected":true,"prioritySpecter":%s,"type":"%s","features":"%s"}' "$_cs_id" "$_cs_name_json" "$_cs_priority" "$_cs_type" "$_cs_features_json"
   done <<EOF
 $(_conflict_registry)
 EOF
   printf ']'
-  unset _cs_first _cs_id _cs_name _cs_scripts _cs_features _cs_type _cs_choice _cs_priority _cs_name_json
+  unset _cs_first _cs_id _cs_name _cs_scripts _cs_features _cs_type _cs_choice _cs_priority _cs_name_json _cs_features_json
 }
 
 conflict_set_choice() {
@@ -186,8 +208,24 @@ conflict_set_choice() {
     [ "$_csc_id" = "$_csc_key" ] || continue
     _csc_found=0
     cfg_set "conflict_$_csc_id" "$_csc_choice"
-    if _conflict_detect "$_csc_id" && [ "$_csc_type" = "aggressive" ]; then
-      _conflict_apply_scripts "$_csc_scripts" "$_csc_choice"
+    if _conflict_detect "$_csc_id"; then
+      if [ "$_csc_type" = "aggressive" ]; then
+        _conflict_apply_scripts "$_csc_scripts" "$_csc_choice"
+      else
+        # passive: sync toggles to match the new priority
+        _csc_old_ifs="$IFS"
+        IFS=','
+        for _csc_feature in $_csc_features; do
+          [ -z "$_csc_feature" ] && continue
+          _csc_toggle_key="$(_conflict_toggle_key "$_csc_feature")"
+          if [ "$_csc_choice" = "priority_specter" ]; then
+            cfg_set "$_csc_toggle_key" "1"
+          else
+            [ -f "$CONFIG_DIR/$_csc_toggle_key.val" ] || cfg_set "$_csc_toggle_key" "0"
+          fi
+        done
+        IFS="$_csc_old_ifs"
+      fi
     fi
     break
   done <<EOF
@@ -195,4 +233,26 @@ $(_conflict_registry)
 EOF
   unset _csc_key _csc_choice _csc_id _csc_name _csc_scripts _csc_features _csc_type
   return $_csc_found
+}
+
+# Called when a user toggles a feature ON in the web UI.
+# Finds any module that claims this feature and switches it to priority_specter,
+# then ensures the toggle is set to 1.
+conflict_resolve_for_feature() {
+  _crf_feature="$1"
+  _crf_toggle_key="$(_conflict_toggle_key "$_crf_feature")"
+  while IFS='|' read -r _crf_id _crf_name _crf_scripts _crf_features _crf_type; do
+    [ -z "$_crf_id" ] && continue
+    _conflict_detect "$_crf_id" || continue
+    case ",$_crf_features," in *",$_crf_feature,"*) ;; *) continue ;; esac
+    [ "$(_conflict_choice "$_crf_id")" = "priority_module" ] || continue
+    cfg_set "conflict_$_crf_id" "priority_specter"
+    if [ "$_crf_type" = "aggressive" ]; then
+      _conflict_apply_scripts "$_crf_scripts" "priority_specter"
+    fi
+  done <<EOF
+$(_conflict_registry)
+EOF
+  cfg_set "$_crf_toggle_key" "1"
+  unset _crf_feature _crf_toggle_key _crf_id _crf_name _crf_scripts _crf_features _crf_type
 }

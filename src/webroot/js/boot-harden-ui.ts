@@ -7,9 +7,12 @@ const t = (key: string, fallback: string): string => getTranslation(key) || fall
 export function openBootHardenDialog() {
   const dialog = document.createElement('md-dialog');
 
-  cfgGet('boot_hardening_proc', '1').then(selinux => {
-    cfgGet('boot_hardening_bootmode', '1').then(bootmode => {
-      dialog.innerHTML = `
+  cfgGet('toggle_boot_hardening', '1').then(parent => {
+    const enabled = parent !== '0';
+    cfgGet('boot_hardening_proc', '1').then(selinux => {
+      cfgGet('boot_hardening_bootmode', '1').then(bootmode => {
+        const banner = enabled ? '' : `<div style="display:flex;align-items:center;gap:8px;padding:12px 16px;background:var(--md-sys-color-surface-variant);border-radius:12px;margin:0 0 12px 0;color:var(--md-sys-color-on-surface-variant);font-size:0.875rem;"><md-icon>info</md-icon><span>${t('feature_disabled_desc', 'Feature is disabled, enable it in Control to configure')}</span></div>`;
+        dialog.innerHTML = `
         <div slot="headline">
           <div class="at-dialog-headline">
             <md-icon aria-hidden="true">security</md-icon>
@@ -18,6 +21,7 @@ export function openBootHardenDialog() {
         </div>
         <div slot="content">
           <p class="at-dialog-desc">${t('boot_harden_dialog_desc', 'Choose which hardening measures to apply at boot.')}</p>
+          ${banner}
           <div class="list-container at-dialog-list">
             <div class="list-item list-item--toggle">
               <div class="li-icon"><md-icon aria-hidden="true">security</md-icon></div>
@@ -26,7 +30,7 @@ export function openBootHardenDialog() {
                 <span class="supporting-text">${t('boot_harden_proc_desc', 'Protect /proc/cmdline, /proc/net/unix, install-recovery.sh')}</span>
               </div>
               <div class="spacer"></div>
-              <md-switch icons id="bh-selinux" ${selinux === '1' ? 'selected' : ''}></md-switch>
+              <md-switch icons id="bh-selinux" ${selinux === '1' ? 'selected' : ''} ${enabled ? '' : 'disabled'}></md-switch>
             </div>
 
             <div class="list-item list-item--toggle">
@@ -36,13 +40,13 @@ export function openBootHardenDialog() {
                 <span class="supporting-text">${t('boot_harden_bootmode_desc', 'Spoof bootmode away from "recovery" to hide recovery status')}</span>
               </div>
               <div class="spacer"></div>
-              <md-switch icons id="bh-bootmode" ${bootmode === '1' ? 'selected' : ''}></md-switch>
+              <md-switch icons id="bh-bootmode" ${bootmode === '1' ? 'selected' : ''} ${enabled ? '' : 'disabled'}></md-switch>
             </div>
           </div>
         </div>
         <div slot="actions">
           <md-text-button id="bh-cancel" class="dialog-action-close">${t('dialog_cancel', 'Cancel')}</md-text-button>
-          <md-filled-button id="bh-save">${t('dialog_save', 'Save')}</md-filled-button>
+          <md-filled-button id="bh-save" ${enabled ? '' : 'disabled'}>${t('dialog_save', 'Save')}</md-filled-button>
         </div>
       `;
 
@@ -72,6 +76,7 @@ export function openBootHardenDialog() {
 
       dialog.show();
     });
+  });
   });
 }
 

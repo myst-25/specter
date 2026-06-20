@@ -8,10 +8,13 @@ export function openPropHandlerDialog() {
   const dialog = document.createElement('md-dialog');
 
   Promise.all([
+    cfgGet('toggle_prop_handler', '1'),
     cfgGet('boot_state_props', '1'),
     cfgGet('spoof_build_props', '1'),
     cfgGet('region_props', '1'),
-  ]).then(([state, spoof, region]) => {
+  ]).then(([parent, state, spoof, region]) => {
+    const enabled = parent !== '0';
+    const banner = enabled ? '' : `<div style="display:flex;align-items:center;gap:8px;padding:12px 16px;background:var(--md-sys-color-surface-variant);border-radius:12px;margin:0 0 12px 0;color:var(--md-sys-color-on-surface-variant);font-size:0.875rem;"><md-icon>info</md-icon><span>${t('feature_disabled_desc', 'Feature is disabled, enable it in Control to configure')}</span></div>`;
     dialog.innerHTML = `
       <div slot="headline">
         <div class="at-dialog-headline">
@@ -21,6 +24,7 @@ export function openPropHandlerDialog() {
       </div>
       <div slot="content">
         <p class="at-dialog-desc">${t('prop_handler_dialog_desc', 'Manage boot-time property spoofing and cleanup.')}</p>
+        ${banner}
         <div class="list-container at-dialog-list">
           <div class="list-item list-item--toggle">
             <div class="li-icon"><md-icon aria-hidden="true">lock</md-icon></div>
@@ -29,7 +33,7 @@ export function openPropHandlerDialog() {
               <span class="supporting-text">${t('prop_handler_boot_state_desc', 'Lock bootloader state, verifiedboot, flash.locked, build type/tags')}</span>
             </div>
             <div class="spacer"></div>
-            <md-switch icons id="ph-state" ${state === '1' ? 'selected' : ''}></md-switch>
+            <md-switch icons id="ph-state" ${state === '1' ? 'selected' : ''} ${enabled ? '' : 'disabled'}></md-switch>
           </div>
 
           <div class="list-item list-item--toggle">
@@ -39,7 +43,7 @@ export function openPropHandlerDialog() {
               <span class="supporting-text">${t('prop_handler_spoof_build_desc', 'Spoof ro.build.flavor to remove userdebug/eng traces')}</span>
             </div>
             <div class="spacer"></div>
-            <md-switch icons id="ph-spoof" ${spoof === '1' ? 'selected' : ''}></md-switch>
+            <md-switch icons id="ph-spoof" ${spoof === '1' ? 'selected' : ''} ${enabled ? '' : 'disabled'}></md-switch>
           </div>
 
           <div class="list-item list-item--toggle">
@@ -49,13 +53,13 @@ export function openPropHandlerDialog() {
               <span class="supporting-text">${t('prop_handler_region_desc', 'Apply region-specific persist props (IMS, VoLTE, locale)')}</span>
             </div>
             <div class="spacer"></div>
-            <md-switch icons id="ph-region" ${region === '1' ? 'selected' : ''}></md-switch>
+            <md-switch icons id="ph-region" ${region === '1' ? 'selected' : ''} ${enabled ? '' : 'disabled'}></md-switch>
           </div>
         </div>
       </div>
       <div slot="actions">
         <md-text-button id="ph-cancel" class="dialog-action-close">${t('dialog_cancel', 'Cancel')}</md-text-button>
-        <md-filled-button id="ph-save">${t('dialog_save', 'Save')}</md-filled-button>
+        <md-filled-button id="ph-save" ${enabled ? '' : 'disabled'}>${t('dialog_save', 'Save')}</md-filled-button>
       </div>
     `;
 

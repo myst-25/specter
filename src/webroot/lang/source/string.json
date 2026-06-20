@@ -97,6 +97,8 @@
   "sp_save_error": "Failed to save",
   "file_browser_empty": "No XML files found",
   "file_browser_show_all": "Show all files",
+  "conflict_covers": "Covers",
+  "feature_disabled_desc": "Feature is disabled, enable it in Control to configure",
   "conflict_toast_module_handles": "Module handles it",
   "conflict_toast_specter_handles": "Specter handles it",
   "role_Founder & Lead Developer": "Founder & Lead Developer",

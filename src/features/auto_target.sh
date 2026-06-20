@@ -11,7 +11,7 @@ BLACKLIST_ENABLED="$SPECTER_DIR/blacklist_enabled"
 KNOWN_PKGS="$SPECTER_DIR/auto_known_packages.txt"
 TEMP_LIST="$SPECTER_DIR/auto_scan_tmp.txt"
 
-_conflict_claimed "target" && { log "AUTO_TARGET" "target claimed by another module, skipping"; exit 0; }
+_feature_should_run "target" || { log "AUTO_TARGET" "target disabled or claimed, skipping"; exit 0; }
 
 log "AUTO_TARGET" "Scanning for new packages"
 

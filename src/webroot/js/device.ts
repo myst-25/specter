@@ -117,6 +117,7 @@ interface ConflictModule {
   friendlyName: string;
   detected: boolean;
   prioritySpecter: boolean;
+  features?: string;
 }
 
 export async function refreshConflictStatus(): Promise<ConflictModule[]> {

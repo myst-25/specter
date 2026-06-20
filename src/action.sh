@@ -17,14 +17,14 @@ log_rotate "$ACTION_LOG"
   log "ACTION" "Running full integrity pipeline"
 
   [ "$(cfg_get toggle_action_gms 1)" != "0" ] && sh "$MODDIR/features/kill_play_store.sh" || true
-  [ "$(cfg_get toggle_action_target 1)" != "0" ] && ! _conflict_claimed "target" && sh "$MODDIR/features/target.sh" --merge || true
-  [ "$(cfg_get toggle_action_security_patch 1)" != "0" ] && ! _conflict_claimed "security_patch" && sh "$MODDIR/features/security_patch.sh" || true
+  _feature_should_run "target" && sh "$MODDIR/features/target.sh" --merge || true
+  _feature_should_run "security_patch" && sh "$MODDIR/features/security_patch.sh" || true
   [ "$(cfg_get toggle_action_keybox 1)" != "0" ] && sh "$MODDIR/features/keybox.sh" || true
   if [ "$(cfg_get toggle_action_pif 1)" != "0" ]; then
     _pif_name=$(_pif_prop) || _pif_name=""
     if [ -z "$_pif_name" ]; then
       if [ -f "$SPECTER_DIR/pif_reported" ]; then
-        log "ACTION" "PIF not found — first boot suppress (pif_reported token consumed)"
+        log "ACTION" "PIF not found ,  first boot suppress (pif_reported token consumed)"
         rm -f "$SPECTER_DIR/pif_reported"
       elif [ -t 1 ]; then
         log "ACTION" "PIF not found. Press Volume UP to install, Volume DOWN to skip..."
@@ -32,14 +32,14 @@ log_rotate "$ACTION_LOG"
         if [ "$_ap_key" = "KEY_VOLUMEUP" ]; then
           install_module_from_github "KOWX712/PlayIntegrityFix" "Play Integrity Fix" || \
             log "ACTION" "PIF install failed"
-          log "ACTION" "PIF installed — reboot required before running autopif"
+          log "ACTION" "PIF installed ,  reboot required before running autopif"
           _pif_installed=1
         else
           log "ACTION" "PIF install skipped by user"
         fi
         unset _ap_key
       else
-        log "ACTION" "PIF not found — auto-install skipped (run from terminal or install manually)"
+        log "ACTION" "PIF not found ,  auto-install skipped (run from terminal or install manually)"
       fi
     fi
     unset _pif_name

@@ -1,6 +1,7 @@
 #!/system/bin/sh
 MODULE_ROOT="${0%/*}"
 MODULE_ROOT="${MODULE_ROOT%/webroot/common}"
+MODDIR="$MODULE_ROOT"
 . "$MODULE_ROOT/lib/paths.sh"
 . "$MODULE_ROOT/lib/config_env.sh"
 . "$MODULE_ROOT/lib/common.sh"
@@ -23,8 +24,16 @@ case "$_cmd" in
       exit 1
     fi
     ;;
+  resolve_feature)
+    _rf_feature="$2"
+    if [ -z "$_rf_feature" ]; then
+      echo "Missing feature name" >&2
+      exit 1
+    fi
+    conflict_resolve_for_feature "$_rf_feature"
+    ;;
   *)
-    echo "Usage: conflicts.sh status | conflicts.sh set <module> <priority_specter|priority_module>" >&2
+    echo "Usage: conflicts.sh status | conflicts.sh set <module> <priority_specter|priority_module> | conflicts.sh resolve_feature <feature>" >&2
     exit 1
     ;;
 esac

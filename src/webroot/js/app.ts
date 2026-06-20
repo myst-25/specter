@@ -146,7 +146,8 @@ async function wireConflictToggles() {
     const hint = document.createElement('span');
     hint.className = 'supporting-text';
     hint.id = `conflict-hint-${mod.key}`;
-    hint.textContent = mod.prioritySpecter ? t('conflict_priority_specter', 'Priority → Specter') : `${t('conflict_priority_module', 'Priority →')} ${mod.friendlyName}`;
+    const featLabel = mod.features ? `${t('conflict_covers', 'Covers')}: ${mod.features} | ` : '';
+    hint.textContent = featLabel + (mod.prioritySpecter ? t('conflict_priority_specter', 'Priority → Specter') : `${t('conflict_priority_module', 'Priority →')} ${mod.friendlyName}`);
 
     content.appendChild(label);
     content.appendChild(hint);
@@ -178,7 +179,8 @@ async function wireConflictToggles() {
           const err = result.stderr || 'Failed to update';          throw new Error(String(err));
         }
 
-        hint.textContent = isModule ? `${t('conflict_priority_module', 'Priority →')} ${mod.friendlyName}` : t('conflict_priority_specter', 'Priority → Specter');
+        const featLabel = mod.features ? `${t('conflict_covers', 'Covers')}: ${mod.features} | ` : '';
+        hint.textContent = featLabel + (isModule ? `${t('conflict_priority_module', 'Priority →')} ${mod.friendlyName}` : t('conflict_priority_specter', 'Priority → Specter'));
         showToast(`${mod.friendlyName}: ${isModule ? t('conflict_toast_module_handles', 'Module handles it') : t('conflict_toast_specter_handles', 'Specter handles it')}`, { icon: 'check_circle', type: 'success', autoCloseDelay: 2500 });
       } catch (e) {
         showToast(t('toast_failed_update', 'Failed to update'), { icon: 'error', type: 'error', autoCloseDelay: 3000 });

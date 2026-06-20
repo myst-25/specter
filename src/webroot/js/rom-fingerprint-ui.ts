@@ -7,9 +7,12 @@ const t = (key: string, fallback: string): string => getTranslation(key) || fall
 export function openRomFingerprintDialog() {
   const dialog = document.createElement('md-dialog');
 
-  cfgGet('rom_fingerprint_hexpatch', '1').then(hex => {
-    cfgGet('rom_fingerprint_prefix', '1').then(pref => {
-      dialog.innerHTML = `
+  cfgGet('toggle_rom_fingerprint', '1').then(parent => {
+    const enabled = parent !== '0';
+    cfgGet('rom_fingerprint_hexpatch', '1').then(hex => {
+      cfgGet('rom_fingerprint_prefix', '1').then(pref => {
+        const banner = enabled ? '' : `<div style="display:flex;align-items:center;gap:8px;padding:12px 16px;background:var(--md-sys-color-surface-variant);border-radius:12px;margin:0 0 12px 0;color:var(--md-sys-color-on-surface-variant);font-size:0.875rem;"><md-icon>info</md-icon><span>${t('feature_disabled_desc', 'Feature is disabled, enable it in Control to configure')}</span></div>`;
+        dialog.innerHTML = `
         <div slot="headline">
           <div class="at-dialog-headline">
             <md-icon aria-hidden="true">fingerprint</md-icon>
@@ -18,6 +21,7 @@ export function openRomFingerprintDialog() {
         </div>
         <div slot="content">
           <p class="at-dialog-desc">${t('rom_fingerprint_dialog_desc', 'Clean traces of custom ROM identity from build properties.')}</p>
+          ${banner}
           <div class="list-container at-dialog-list">
             <div class="list-item list-item--toggle">
               <div class="li-icon"><md-icon aria-hidden="true">search</md-icon></div>
@@ -26,7 +30,7 @@ export function openRomFingerprintDialog() {
                 <span class="supporting-text">${t('rom_fingerprint_hexpatch_desc', 'Delete build props containing known ROM names (Lineage, crDroid, PixelOS, etc.)')}</span>
               </div>
               <div class="spacer"></div>
-              <md-switch icons id="rf-hexpatch" ${hex === '1' ? 'selected' : ''}></md-switch>
+              <md-switch icons id="rf-hexpatch" ${hex === '1' ? 'selected' : ''} ${enabled ? '' : 'disabled'}></md-switch>
             </div>
 
             <div class="list-item list-item--toggle">
@@ -36,13 +40,13 @@ export function openRomFingerprintDialog() {
                 <span class="supporting-text">${t('rom_fingerprint_prefix_desc', 'Strip custom ROM prefixes (aosp_, lineage_) from build fingerprint and display id')}</span>
               </div>
               <div class="spacer"></div>
-              <md-switch icons id="rf-prefix" ${pref === '1' ? 'selected' : ''}></md-switch>
+              <md-switch icons id="rf-prefix" ${pref === '1' ? 'selected' : ''} ${enabled ? '' : 'disabled'}></md-switch>
             </div>
           </div>
         </div>
         <div slot="actions">
           <md-text-button id="rf-cancel" class="dialog-action-close">${t('dialog_cancel', 'Cancel')}</md-text-button>
-          <md-filled-button id="rf-save">${t('dialog_save', 'Save')}</md-filled-button>
+          <md-filled-button id="rf-save" ${enabled ? '' : 'disabled'}>${t('dialog_save', 'Save')}</md-filled-button>
         </div>
       `;
 
@@ -72,6 +76,7 @@ export function openRomFingerprintDialog() {
 
       dialog.show();
     });
+  });
   });
 }
 

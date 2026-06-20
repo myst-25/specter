@@ -128,9 +128,17 @@ export function exec(command: string): Promise<ExecResult> {
     const executor = getExecutor();
     if (!executor) { reject(new BridgeError('NO_BRIDGE', 'no-bridge')); return; }
     const globalName = genCallbackName();
+    let timer: ReturnType<typeof setTimeout>;
+
+    function cleanup() { clearTimeout(timer); unregisterCallback(globalName); }
+
+    timer = setTimeout(() => {
+      cleanup();
+      reject(new TimeoutError());
+    }, EXEC_TIMEOUT_MS);
 
     registerCallback(globalName, (...args: unknown[]) => {
-      unregisterCallback(globalName);
+      cleanup();
       const code = args[0];
       const stdout = args[1];
       const stderr = args[2];
@@ -139,25 +147,26 @@ export function exec(command: string): Promise<ExecResult> {
         return;
       }
       if (typeof code !== 'string') {
-        resolve({ stdout: '', stderr: '' });
+        resolve({ code: -1, stdout: '', stderr: 'unexpected-callback-type' });
         return;
       }
-      if (!code) { resolve({ stdout: '', stderr: '' }); return; }
+      if (!code) { resolve({ code: -1, stdout: '', stderr: '' }); return; }
       try {
         const json = JSON.parse(code);
         resolve({
+          code: typeof json.code === 'number' ? json.code : json.success !== false ? 0 : 1,
           stdout: json.result || json.stdout || json.output || '',
           stderr: json.stderr || json.error || '',
         });
       } catch (e) {
         console.warn('Exec JSON parse fallback:', e);
-        resolve({ stdout: code, stderr: '' });
+        resolve({ code: -1, stdout: code, stderr: '' });
       }
     });
 
     try {
       window.ksu.exec(command, '{}', globalName);
-    } catch (e) { unregisterCallback(globalName); reject(e); }
+    } catch (e) { cleanup(); reject(e); }
   });
 }
 

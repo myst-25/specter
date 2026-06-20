@@ -2,7 +2,7 @@
 
 **New**
 - Auto PIF background job (dialog-based interval config, fetches via pif.sh on schedule)
-- `pif_reported` token — first-boot suppress of PIF auto-install (consumed in action.sh)
+- `pif_reported` token, first-boot suppress of PIF auto-install (consumed in action.sh)
 - Boot hash dialog paste/zero icon buttons inside text field
 - Contributor roles translated + re-render on language switch
 
@@ -14,6 +14,12 @@
 - `loadContributors` waits for i18n init before rendering
 - `auto_target_interval_desc` minimum raised from 1s to 3s
 - Keybox install no longer passes unused spinner args
+- Conflict system rewritten: toggle `.val` files are the single source of truth; `resolve_conflicts()` writes `toggle_<feature>=0` for claimed features; `_feature_should_run()` checks toggle only (removed separate `_conflict_claimed()` gate); conflict section priority switches batch-update toggles
+- `action.sh` and `auto_target.sh` use `_feature_should_run()` instead of manual toggle + `_conflict_claimed()` checks
+- `conflict_set_choice()` syncs feature toggles when priority changes
+- Feature names exposed in `conflict_status_json()` output + shown in UI hint text (`conflict_covers` key)
+- `exec()` bridge timeout added + exit code properly extracted from JSON responses
+- Dialog UIs (prop-handler, boot-harden, gms, adb-disabler, rom-fingerprint) check parent toggle state; child switches disabled with banner when parent is OFF
 
 **i18n**
 - 70 new keys added to `string.json` (autopif, history descriptions, error strings, font toggles, keybox provider, boot hash placeholders)
@@ -26,6 +32,8 @@
 - `tee-hash-ui.ts`: dead `cacheDir()` + unused `getModuleDir` import removed
 - `toggles.ts`: unused `ToggleDef` import removed
 - `autopif-ui.ts`: null check for dialog elements
+- `_conflict_registry()` fallback path broke when `$MODDIR` unset (web bridge context), BRENE never appeared in conflict section
+- Passive module conflict choices overwritten every boot (user selection wiped on reboot)
 
 **Removed**
 - Zygisk Next auto-download & install from customize.sh
@@ -34,7 +42,7 @@
 # v1.4.4.13
 
 **New**
-- `boot_hash.sh` — zero-rejection boot hash priority chain (TS file → TEE → prop → partition)
+- `boot_hash.sh`, zero-rejection boot hash priority chain (TS file → TEE → prop → partition)
 - Zygisk Next auto-install in customize.sh (+ PIF-style zygisk detection via libzygisk.so + Magisk SQLite)
 - Conflict uninstall runs module's `uninstall.sh` before removing dir
 
@@ -45,7 +53,7 @@
 - Install order: Zygisk Next → TEESimulator-RS → PIF
 
 **Fixed**
-- Boot hash never set to zeros — every source rejects all-zero values
+- Boot hash never set to zeros, every source rejects all-zero values
 
 **Improved**
 - Recent activity shows per-script descriptions (e.g. "Keybox: Yuri v54", "TEE normal · 9530...")
@@ -55,7 +63,7 @@
 **New**
 - BRENE conflict resolution (passive, boot_hardening/prop_handler/boot_hash)
 - boot_hash.sh writes computed hash to BRENE's config when BRENE has priority
-- `install_module_from_github()` + `module_detect()` in new `lib/modules.sh` — shared module download, install & detection
+- `install_module_from_github()` + `module_detect()` in new `lib/modules.sh`, shared module download, install & detection
 - PIF auto-install in action.sh & customize.sh (KOWX712/PlayIntegrityFix)
 
 **Changed**
@@ -64,7 +72,7 @@
 - common.sh sources modules.sh
 
 **Fixed**
-- `vbmeta_digest()` in `vbmeta.sh` — fixed variable pollution, footer size, and shell syntax bugs
+- `vbmeta_digest()` in `vbmeta.sh`, fixed variable pollution, footer size, and shell syntax bugs
 - `boot_hash.sh` now called from `service.sh`; redundant digest set removed from `props.sh`
 - TEE & Boot Hash popup uses `boot_hash.sh` priority chain instead of raw TEE hash
 
