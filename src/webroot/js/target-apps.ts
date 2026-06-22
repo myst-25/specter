@@ -571,6 +571,14 @@ export async function openTargetAppsManager() {
 
       const labelMap = await resolvePackageNames(pkgs);
 
+      const pkgSet = new Set(pkgs);
+      for (const pkg of targetMap.keys()) {
+        if (!pkgSet.has(pkg)) {
+          pkgs.push(pkg);
+          pkgSet.add(pkg);
+        }
+      }
+
       apps = pkgs.map(pkg => ({
         packageName: pkg,
         appName: labelMap.get(pkg) || pkg,
@@ -604,6 +612,14 @@ export async function openTargetAppsManager() {
       }
 
       const labelMap = await resolvePackageNames(pkgs);
+
+      const pkgSet = new Set(pkgs);
+      for (const pkg of targetMap.keys()) {
+        if (!pkgSet.has(pkg)) {
+          pkgs.push(pkg);
+          pkgSet.add(pkg);
+        }
+      }
 
       apps = pkgs.map(pkg => ({
         packageName: pkg,
