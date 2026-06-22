@@ -48,8 +48,15 @@ PROP_BHASH=$(getprop ro.boot.vbmeta.digest 2>/dev/null || echo "")
 _winner=""
 _winner_src=""
 
+# Priority 0: Custom boot hash (user-configured override)
+CUSTOM_BHASH=$(cfg_get custom_boot_hash "")
+if [ -z "$_winner" ] && [ -n "$CUSTOM_BHASH" ] && [ "${#CUSTOM_BHASH}" -eq 64 ]; then
+  _winner="$CUSTOM_BHASH"
+  _winner_src="custom"
+fi
+
 # Priority 1: TEE attestation hash
-if [ -n "$TEE_BHASH" ] && ! _is_zero "$TEE_BHASH" && [ "${#TEE_BHASH}" -eq 64 ]; then
+if [ -z "$_winner" ] && [ -n "$TEE_BHASH" ] && ! _is_zero "$TEE_BHASH" && [ "${#TEE_BHASH}" -eq 64 ]; then
   _winner="$TEE_BHASH"
   _winner_src="TEE attestation"
 fi
@@ -76,6 +83,10 @@ fi
 # Step 3: Apply winner
 if [ -n "$_winner" ]; then
   case "$_winner_src" in
+    "custom")
+      log "BOOT_HASH" "Custom boot hash override"
+      _set_hash "$_winner"
+      ;;
     "TEE attestation"|"partition")
       _set_hash "$_winner"
       ;;

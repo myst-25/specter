@@ -32,7 +32,6 @@ if _feature_should_run "prop_handler"; then
   [ "$(cfg_get spoof_build_props 1)" != "0" ] && spoof_build_props
   [ "$(cfg_get region_props 1)" != "0" ] && apply_region_props
   sh "$MODDIR/features/boot_state_props.sh" >"$SPECTER_DIR/log/boot_state_props.log" 2>&1
-  [ "$(cfg_get toggle_vbmeta 1)" != "0" ] && sh "$MODDIR/features/vbmeta.sh" >"$SPECTER_DIR/log/boot_vbmeta.log" 2>&1 || true
   [ "$(cfg_get toggle_boot_hash 1)" != "0" ] && sh "$MODDIR/features/boot_hash.sh" >"$SPECTER_DIR/log/boot_hash.log" 2>&1 || true
 else
   log "SERVICE" "Skipping prop_handler (disabled by config)"

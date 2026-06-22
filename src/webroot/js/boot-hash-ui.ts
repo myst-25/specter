@@ -85,6 +85,7 @@ export function wireBootHash() {
       try {
         if (val) {
           await exec(`mkdir -p ${shellEscape(cdir)} && printf '%s' ${shellEscape(val)} > ${hashPath}`);
+          await exec(`su -c "resetprop -n ro.boot.vbmeta.digest ${shellEscape(val)}" 2>/dev/null || true`);
         } else {
           await exec(`rm -f ${hashPath}`);
         }

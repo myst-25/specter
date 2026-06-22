@@ -3,7 +3,6 @@ import { getTranslation } from './i18n.js';
 import { showToast } from './toast.js';
 import { addEntry } from './history.js';
 import { appendToOutput } from './terminal.js';
-
 const t = (key: string, fallback: string): string => getTranslation(key) || fallback;
 
 export function wireTeeHash() {
