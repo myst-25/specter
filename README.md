@@ -72,8 +72,8 @@ Output: `Specter-v{version}.zip`
 ### Testing
 
 ```bash
-bash tests/run.sh          # Shell tests. 6 files, 67 assertions.
-npm test                   # TS tests. 9 files, 86 tests (vitest + happy-dom).
+bash tests/run.sh          # Shell tests. 6 files, 97 assertions.
+npm test                   # TS tests. 10 files, 92 tests (vitest + happy-dom).
 npx tsc --noEmit           # TypeScript strict check
 ```
 
@@ -100,6 +100,16 @@ NOTHING IS 100% GUARANTEED. USE AT YOUR OWN RISK.
 YOUR WARRANTY MAY BE VOIDED, APPS MAY BREAK, AND ACCOUNT BANS ARE POSSIBLE.
 ALWAYS MAINTAIN BACKUPS OF IMPORTANT DATA.
 ```
+
+## Translations
+
+The WebUI is translated into Arabic, Spanish, Russian, and Chinese (all AI-generated — human review welcome).
+
+To contribute translations:
+- **Preferred**: Join the [Crowdin project](https://crowdin.com/project/specter) — web UI, no git needed
+- **Alternative**: Edit the JSON files in `src/webroot/lang/` and submit a PR
+
+Each `*.json` file is validated against `source/string.json` in CI (`npm test`). New keys without translations fall back to English.
 
 ## Thanks
 
