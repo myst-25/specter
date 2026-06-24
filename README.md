@@ -23,7 +23,6 @@ Specter is a complete rewrite of what I originally built as Yurikey.
 
 - Telegram: [Channel](https://t.me/dpejoh) · [Group](https://t.me/dpejoh0)
 - Ko-fi: [ko-fi.com/dpejoh](https://ko-fi.com/dpejoh)
-- PayPal: dpejoh@atomicmail.io
 - BTC: bc1qfy4vfstns4aqhvck66x0r53n3hfkkzhwkt7zpw
 - ETC: 0x895762C0Fd2BeF54EE3cD478Fc03212aeA673a68
 
