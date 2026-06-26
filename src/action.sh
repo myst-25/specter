@@ -32,56 +32,69 @@ _pif_validate_fingerprint() {
 }
 
 {
-  log_i "ACTION" "Running full integrity pipeline"
+  log "ACTION" "Running full integrity pipeline"
+  echo ""
 
-  _feature_should_run "gms" && sh "$MODDIR/features/kill_play_store.sh" || true
-  _feature_should_run "target" && sh "$MODDIR/features/target.sh" --merge || true
-  _feature_should_run "security_patch" && sh "$MODDIR/features/security_patch.sh" || true
-  _feature_should_run "keybox" && sh "$MODDIR/features/keybox.sh" || true
+  if _feature_should_run "gms"; then
+    sh "$MODDIR/features/kill_play_store.sh" > /dev/null 2>&1 || true
+    echo ""
+  fi
+
+  if _feature_should_run "target"; then
+    sh "$MODDIR/features/target.sh" --merge > /dev/null 2>&1 || true
+    echo ""
+  fi
+
+  if _feature_should_run "security_patch"; then
+    sh "$MODDIR/features/security_patch.sh" > /dev/null 2>&1 || true
+    echo ""
+  fi
+
+  if _feature_should_run "keybox"; then
+    sh "$MODDIR/features/keybox.sh" > /dev/null 2>&1 || true
+    echo ""
+  fi
+
   if _feature_should_run "pif"; then
     _pif_name=$(_pif_prop) || _pif_name=""
     if [ -z "$_pif_name" ]; then
       if [ -f "$SPECTER_DIR/pif_reported" ]; then
-        log_d "ACTION" "PIF not found, first boot suppress (pif_reported token consumed)"
+        log "ACTION" "PIF not found, first boot suppress (pif_reported token consumed)"
         rm -f "$SPECTER_DIR/pif_reported"
       elif [ -t 1 ]; then
-        log_i "ACTION" "PIF not found. Press Volume UP to install, Volume DOWN to skip..."
+        log "ACTION" "PIF not found. Press Volume UP to install, Volume DOWN to skip..."
         _ap_key=$(timeout 10 getevent -l 2>/dev/null | grep -oE "KEY_VOLUME(UP|DOWN)" | head -1)
         if [ "$_ap_key" = "KEY_VOLUMEUP" ]; then
-          install_module_from_github "KOWX712/PlayIntegrityFix" "Play Integrity Fix" || \
-            log_e "ACTION" "PIF install failed"
-          log_i "ACTION" "PIF installed, reboot required before running autopif"
+          install_module_from_github "KOWX712/PlayIntegrityFix" "Play Integrity Fix" > /dev/null 2>&1 || \
+            log "ACTION" "PIF install failed"
+          log "ACTION" "PIF installed, reboot required before running autopif"
           _pif_installed=1
         else
-          log_i "ACTION" "PIF install skipped by user"
+          log "ACTION" "PIF install skipped by user"
         fi
         unset _ap_key
       else
-        log_w "ACTION" "PIF not found, auto-install skipped (run from terminal or install manually)"
+        log "ACTION" "PIF not found, auto-install skipped (run from terminal or install manually)"
       fi
     elif [ -f "$SPECTER_DIR/pif_reported" ]; then
-      log_i "ACTION" "PIF found, first boot - checking existing fingerprint validity"
+      log "ACTION" "PIF found, first boot - checking existing fingerprint validity"
       if _pif_validate_fingerprint; then
-        log_i "ACTION" "Existing fingerprint valid, skipping fetch"
+        log "ACTION" "Existing fingerprint valid, skipping fetch"
       else
-        log_i "ACTION" "Fingerprint invalid or missing, fetching new"
-        sh "$MODDIR/features/pif.sh" || true
+        log "ACTION" "Fingerprint invalid or missing, fetching new"
+        sh "$MODDIR/features/pif.sh" > /dev/null 2>&1 || true
       fi
       rm -f "$SPECTER_DIR/pif_reported"
       _pif_skip=1
     fi
     unset _pif_name
     if [ -z "$_pif_installed" ] && [ -z "$_pif_skip" ] && [ -f "$MODDIR/features/pif.sh" ]; then
-      sh "$MODDIR/features/pif.sh" || true
+      sh "$MODDIR/features/pif.sh" > /dev/null 2>&1 || true
     fi
+    echo ""
   fi
 
-
-  [ -f "$MODDIR/module.prop.bak" ] && cp "$MODDIR/module.prop.bak" "$MODDIR/module.prop"
-  . "$MODDIR/lib/desc.sh"
-  refresh_module_description
-
-  log_i "ACTION" "Full integrity pipeline completed"
+  log "ACTION" "Full integrity pipeline completed"
 } 2>&1 | tee -a "$ACTION_LOG"
 
 exit 0
