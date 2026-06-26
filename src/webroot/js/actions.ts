@@ -2,7 +2,7 @@ import { spawnScript } from './bridge.js';
 import { appendToOutput } from './terminal.js';
 import { showToast } from './toast.js';
 import { showErrorDialog } from './dialog.js';
-import { addEntry } from './history.js';
+import { addEntry, getScriptDescription } from './history.js';
 import { escapeHtml } from './utils.js';
 import { getTranslation } from './i18n.js';
 import { getFriendlyName, isDevMode, setFriendlyNames } from './state.js';
@@ -90,6 +90,8 @@ export async function runSimpleAction(scriptName: string) {
   const child = spawnScript(scriptName, 'feature');
   child.stdout.on('data', (line: string) => {
     appendToOutput(line); lines.push(line);
+    const pretty = getScriptDescription(scriptName, lines.join('\n'));
+    if (text && pretty) text.textContent = pretty;
   });
   child.stderr.on('data', (line: string) => {
     appendToOutput(line, true); lines.push('[!] ' + line);

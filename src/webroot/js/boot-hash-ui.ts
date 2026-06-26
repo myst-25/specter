@@ -26,7 +26,7 @@ export function wireBootHash() {
     dialog.innerHTML = `
       <div slot="headline">${t('boot_hash_dialog_title', 'Custom Boot Hash')}</div>
       <div slot="content" style="min-height:0">
-        <md-outlined-text-field id="boot-hash-input" type="text" label="${t('boot_hash_label', 'Boot Hash (SHA256)')}" placeholder="${t('boot_hash_placeholder', '64 hex characters')}" maxlength="64" autocapitalize="none" style="width:100%;margin-top:8px;--md-outlined-text-field-container-shape:14px;font-family:monospace;--md-outlined-field-with-trailing-content-trailing-space:24px;overflow:hidden">
+        <md-outlined-text-field id="boot-hash-input" type="text" label="${t('boot_hash_label', 'Boot Hash (SHA256)')}" placeholder="${t('boot_hash_placeholder', '64 hex characters')}" maxlength="64" autocapitalize="none" style="width:100%;margin-top:8px;--md-outlined-text-field-container-shape:14px;font-family:monospace;--md-outlined-field-with-trailing-content-trailing-space:24px">
           <div slot="trailing-icon" style="display:flex;align-items:center;gap:2px">
             <md-icon-button id="boot-hash-paste" style="--md-icon-button-icon-size:18px;width:32px;height:32px" aria-label="${t('kb_paste_aria', 'Paste from clipboard')}">
               <md-icon>content_paste</md-icon>

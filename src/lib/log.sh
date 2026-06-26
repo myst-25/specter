@@ -71,7 +71,7 @@ __ll_emit() {
   __ll_init
   __ll_should_log "$_le_level" || { unset _le_level _le_tag _le_msg; return 0; }
   _le_prefix=$(__ll_prefix "$_le_level")
-  printf '[%s] [%s] [%s] %s\n' "$(date '+%T')" "$_le_prefix" "$_le_tag" "$_le_msg"
+  printf '[%s] [%s] %s\n' "$_le_prefix" "$_le_tag" "$_le_msg"
   if [ "$_le_level" -ge "$__ll_lc_num" ] && __ll_check_logcat; then
     /system/bin/log -t "Specter" -p "$(__ll_logcat_level "$_le_level")" "$_le_tag: $_le_msg" 2>/dev/null || true
   fi
