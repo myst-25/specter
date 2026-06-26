@@ -1,5 +1,20 @@
 * {
   -webkit-tap-highlight-color: transparent;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+::-webkit-scrollbar,
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-thumb,
+*::-webkit-scrollbar,
+*::-webkit-scrollbar-track,
+*::-webkit-scrollbar-thumb {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
+  opacity: 0 !important;
 }
 
 html, body {
@@ -887,10 +902,6 @@ md-divider.settings-divider {
 
 /* --- Floating Navigation Bar --- */
 
-body:has(md-dialog[open]) .nav-bar,
-body:has(.ta-overlay--open) .nav-bar {
-  display: none !important;
-}
 
 @media (pointer: coarse), (max-height: 600px) {
   body:has(input:focus, textarea:focus, [contenteditable="true"]:focus, md-outlined-text-field:focus-within) .nav-bar {
