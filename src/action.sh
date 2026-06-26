@@ -36,22 +36,22 @@ _pif_validate_fingerprint() {
   echo ""
 
   if _feature_should_run "gms"; then
-    sh "$MODDIR/features/kill_play_store.sh" > /dev/null 2>&1 || true
+    sh "$MODDIR/features/kill_play_store.sh" || true
     echo ""
   fi
 
   if _feature_should_run "target"; then
-    sh "$MODDIR/features/target.sh" --merge > /dev/null 2>&1 || true
+    sh "$MODDIR/features/target.sh" --merge || true
     echo ""
   fi
 
   if _feature_should_run "security_patch"; then
-    sh "$MODDIR/features/security_patch.sh" > /dev/null 2>&1 || true
+    sh "$MODDIR/features/security_patch.sh" || true
     echo ""
   fi
 
   if _feature_should_run "keybox"; then
-    sh "$MODDIR/features/keybox.sh" > /dev/null 2>&1 || true
+    sh "$MODDIR/features/keybox.sh" || true
     echo ""
   fi
 
@@ -65,7 +65,7 @@ _pif_validate_fingerprint() {
         log "ACTION" "PIF not found. Press Volume UP to install, Volume DOWN to skip..."
         _ap_key=$(timeout 10 getevent -l 2>/dev/null | grep -oE "KEY_VOLUME(UP|DOWN)" | head -1)
         if [ "$_ap_key" = "KEY_VOLUMEUP" ]; then
-          install_module_from_github "KOWX712/PlayIntegrityFix" "Play Integrity Fix" > /dev/null 2>&1 || \
+          install_module_from_github "KOWX712/PlayIntegrityFix" "Play Integrity Fix" || \
             log "ACTION" "PIF install failed"
           log "ACTION" "PIF installed, reboot required before running autopif"
           _pif_installed=1
@@ -82,14 +82,14 @@ _pif_validate_fingerprint() {
         log "ACTION" "Existing fingerprint valid, skipping fetch"
       else
         log "ACTION" "Fingerprint invalid or missing, fetching new"
-        sh "$MODDIR/features/pif.sh" > /dev/null 2>&1 || true
+        sh "$MODDIR/features/pif.sh" || true
       fi
       rm -f "$SPECTER_DIR/pif_reported"
       _pif_skip=1
     fi
     unset _pif_name
     if [ -z "$_pif_installed" ] && [ -z "$_pif_skip" ] && [ -f "$MODDIR/features/pif.sh" ]; then
-      sh "$MODDIR/features/pif.sh" > /dev/null 2>&1 || true
+      sh "$MODDIR/features/pif.sh" || true
     fi
     echo ""
   fi
