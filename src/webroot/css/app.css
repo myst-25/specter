@@ -53,6 +53,11 @@ code, pre {
   --md-dialog-container-color: var(--md-sys-color-surface-container-high);
 }
 
+md-dialog md-outlined-text-field,
+md-dialog md-filled-text-field {
+  --md-outlined-field-label-text-background-color: var(--md-sys-color-surface-container-high);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
